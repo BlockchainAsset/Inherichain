@@ -105,3 +105,12 @@ dist
 
 # package-lock.json
 package-lock.json
+
+# build folder from truffle migrate
+build
+
+# solidity test coverage (solidity-coverage)
+coverage.json
+
+# VSCode
+.vscode
