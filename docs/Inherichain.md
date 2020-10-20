@@ -7,30 +7,37 @@ This is an alpha version, it is not yet audited, use with caution.
 
 ### `onlyOwner()`
 
-
+Only Primary owner can call this function.
 
 
 
 ### `checkAddress(address _addr)`
 
-
+Checks whether the address is valid or zero address.
 
 
 
 ### `onlyOwners()`
 
-
+Only Primary or Backup Owner can call this function.
 
 
 
 ### `onlyHeir()`
 
-
+Only Heir can call this function.
 
 
 
 ### `onlyApprover()`
 
+Only an Approver can call this function.
+
+
+
+### `checkRemaining(uint256 _amount)`
+
+Check if the contract have enough balance.
 
 
 
@@ -85,10 +92,37 @@ The approver has to be valid.
 
 ### `fallback()` (external)
 
-Fallback
+Fallback Function for complex calls to other contracts.
 
 
-Proxy Logic
+Proxy Logic only owner can call.
+
+### `receive()` (external)
+
+Can be used to receive ether from anyone.
+
+
+This allows to receive ether from anyone unlike the fallback function.
+
+### `withdrawAllETH()` (public)
+
+Withdraw Complete ETH balance.
+
+
+
+### `withdrawSomeETH(uint256 _amount)` (public)
+
+Withdraw a particular amount of ETH.
+
+
+
+
+### `transferETH(address payable _receiver, uint256 _amount)` (public)
+
+Transfer `_amount` ETH to `_receiver`.
+
+
+
 
 ### `deployContract(uint256 _value, bytes _bytecode) → address contractAddress` (public)
 
@@ -228,5 +262,33 @@ This event is used to notify the decision by the approver.
 
 
 This event is used to notify when the approval is successful.
+
+
+### `contractDeployed(address _contractAddress, address _owner)`
+
+
+
+The event is used to notify the creation of a contract.
+
+
+### `ethReceived(uint256 _amount, address _sender)`
+
+
+
+The event is used to notify ether deposits.
+
+
+### `ethWithdrawed(uint256 _amount, address _receiver)`
+
+
+
+The event is used to notify ether withdraws.
+
+
+### `ethTransferred(uint256 _amount, address _receiver)`
+
+
+
+The event is used to notify ether transfers.
 
 

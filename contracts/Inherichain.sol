@@ -122,18 +122,44 @@ contract Inherichain {
 	///	@param _approveCount The no. of votes received by the heir for approval.
 	event heirApproved(uint256 indexed _approveCount);
 
+	///	@dev The event is used to notify the creation of a contract.
+	///	@param _contractAddress The newly created contract address.
+	///	@param _owner The owner who created the contract.
+	event contractDeployed(
+		address indexed _contractAddress,
+		address indexed _owner
+	);
+
+	///	@dev The event is used to notify ether deposits.
+	///	@param _amount The amount of ether received in wei.
+	///	@param _sender The address of the sender of eth.
+	event ethReceived(uint256 indexed _amount, address indexed _sender);
+
+	///	@dev The event is used to notify ether withdraws.
+	///	@param _amount The amount of ether withdrawed in wei.
+	///	@param _receiver The address of the receiver of eth.
+	event ethWithdrawed(uint256 indexed _amount, address indexed _receiver);
+
+	///	@dev The event is used to notify ether transfers.
+	///	@param _amount The amount of ether transferred in wei.
+	///	@param _receiver The address of the receiver of eth.
+	event ethTransferred(uint256 indexed _amount, address indexed _receiver);
+
 	/*  Modifiers   */
 
+	/// @notice Only Primary owner can call this function.
 	modifier onlyOwner {
 		require(msg.sender == owner, "Only owner can call this function.");
 		_;
 	}
 
+	/// @notice Checks whether the address is valid or zero address.
 	modifier checkAddress(address _addr) {
 		require(_addr != address(0), "Address has to be valid.");
 		_;
 	}
 
+	/// @notice Only Primary or Backup Owner can call this function.
 	modifier onlyOwners {
 		require(
 			msg.sender == owner || msg.sender == backupOwner,
@@ -142,15 +168,27 @@ contract Inherichain {
 		_;
 	}
 
+	/// @notice Only Heir can call this function.
 	modifier onlyHeir {
 		require(msg.sender == heir, "Only heir can call this function.");
 		_;
 	}
 
+	/// @notice Only an Approver can call this function.
 	modifier onlyApprover {
 		require(
 			approverStatus[msg.sender],
 			"Only an approver can call this function."
+		);
+		_;
+	}
+
+	/// @notice Check if the contract have enough balance.
+	/// @param _amount The amount which will be transferred.
+	modifier checkRemaining(uint256 _amount) {
+		require(
+			_amount <= payable(address(this)).balance,
+			"Amount requested greater than balance."
 		);
 		_;
 	}
@@ -318,8 +356,8 @@ contract Inherichain {
 		emit approverDeleted(_approver, msg.sender);
 	}
 
-	///	@notice Fallback
-	///	@dev Proxy Logic
+	///	@notice Fallback Function for complex calls to other contracts.
+	///	@dev Proxy Logic only owner can call.
 	fallback() external payable onlyOwner {
 		address contractAddr;
 		uint256 begin_index = msg.data.length - 32;
@@ -359,6 +397,42 @@ contract Inherichain {
 		}
 	}
 
+	/// @notice Can be used to receive ether from anyone.
+	/// @dev This allows to receive ether from anyone unlike the fallback function.
+	receive() external payable {
+		emit ethReceived(msg.value, msg.sender);
+	}
+
+	/// @notice Withdraw Complete ETH balance.
+	function withdrawAllETH() public onlyOwner {
+		uint256 amount = payable(address(this)).balance;
+		msg.sender.transfer(amount);
+		emit ethWithdrawed(amount, msg.sender);
+	}
+
+	/// @notice Withdraw a particular amount of ETH.
+	/// @param _amount Amount requested for withdrawal
+	function withdrawSomeETH(uint256 _amount)
+		public
+		onlyOwner
+		checkRemaining(_amount)
+	{
+		msg.sender.transfer(_amount);
+		emit ethWithdrawed(_amount, msg.sender);
+	}
+
+	/// @notice Transfer `_amount` ETH to `_receiver`.
+	/// @param _receiver The address of the receiver.
+	/// @param _amount The amount to be received.
+	function transferETH(address payable _receiver, uint256 _amount)
+		public
+		onlyOwner
+		checkRemaining(_amount)
+	{
+		_receiver.transfer(_amount);
+		emit ethTransferred(_amount, _receiver);
+	}
+
 	///	@notice Can be used to deploy contracts.
 	///	@param _value The ether to be sent in wei.
 	///	@param _bytecode The smart contract code.
@@ -377,6 +451,7 @@ contract Inherichain {
 				mload(_bytecode)
 			)
 		}
+		emit contractDeployed(contractAddress, msg.sender);
 	}
 
 	/*  Backup Owner Functions  */

@@ -11,7 +11,7 @@
     "prettier": "prettier --write **/*.sol",
     "documentation": "solidity-docgen --solc-module ./node_modules/solc",
     "test": "truffle test --network development",
-    "coverage": "truffle run coverage --file='test/*.test.js' --network development"
+    "coverage": "truffle run coverage --file='test/*.test.js' --network coverage"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
   ],
   "author": "Shebin John",
   "license": "ISC",
+  "precommit": "",
   "bugs": {
     "url": "https://github.com/remedcu/Inherichain/issues"
   },
