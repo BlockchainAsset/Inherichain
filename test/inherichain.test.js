@@ -187,6 +187,135 @@ contract("Inherichain", (accounts) => {
     );
   });
 
+  it("Should create the contract correctly part 3.", async () => {
+    inherichain = await Inherichain.new(
+      constants.ZERO_ADDRESS,
+      constants.ZERO_ADDRESS,
+      heir,
+      [approverOne, approverTwo, approverThree],
+      newDeadline,
+      newApproverDeadline
+    );
+    const cHeirDeadline = await inherichain.heirDeadline();
+    const cHeirApprovedDeadline = await inherichain.heirApprovedDeadline();
+    const cOwner = await inherichain.owner();
+    const cBackupOwner = await inherichain.backupOwner();
+    const cHeir = await inherichain.heir();
+    const cApproverOneStatus = await inherichain.approverStatus(approverOne);
+    const cApproverTwoStatus = await inherichain.approverStatus(approverTwo);
+    const cApproverThreeStatus = await inherichain.approverStatus(
+      approverThree
+    );
+    const cApproversLength = await inherichain.approversLength();
+    assert.strictEqual(
+      cHeirDeadline.toNumber(),
+      newDeadline,
+      "Default deadline is not set."
+    );
+    assert.strictEqual(
+      cHeirApprovedDeadline.toNumber(),
+      newApproverDeadline,
+      "Default approved deadline is not set."
+    );
+    assert.strictEqual(cOwner, owner, "Owner set in contract is wrong.");
+    assert.strictEqual(
+      cBackupOwner,
+      constants.ZERO_ADDRESS,
+      "Backup Owner set in contract is wrong."
+    );
+    assert.strictEqual(cHeir, heir, "Heir set in contract is wrong.");
+    assert.strictEqual(
+      cApproverOneStatus,
+      true,
+      "Approver One status not set correctly."
+    );
+    assert.strictEqual(
+      cApproverTwoStatus,
+      true,
+      "Approver Two status not set correctly."
+    );
+    assert.strictEqual(
+      cApproverThreeStatus,
+      true,
+      "Approver Three status not set correctly."
+    );
+    assert.strictEqual(
+      cApproversLength.toNumber(),
+      3,
+      "Approver Length in contract is wrong."
+    );
+  });
+
+  it("Should not create the contract with wrong parameters part 1.", async () => {
+    await expectRevert(
+      Inherichain.new(
+        owner,
+        owner,
+        heir,
+        [approverOne, approverTwo, approverThree],
+        newDeadline,
+        newApproverDeadline
+      ),
+      "Backup owner and owner cannot be same."
+    );
+  });
+
+  it("Should not create the contract with wrong parameters part 3.", async () => {
+    await expectRevert(
+      Inherichain.new(
+        owner,
+        backupOwner,
+        owner,
+        [approverOne, approverTwo, approverThree],
+        newDeadline,
+        newApproverDeadline
+      ),
+      "Owner and heir cannot be same."
+    );
+  });
+
+  it("Should not create the contract with wrong parameters part 4.", async () => {
+    await expectRevert(
+      Inherichain.new(
+        owner,
+        backupOwner,
+        backupOwner,
+        [approverOne, approverTwo, approverThree],
+        newDeadline,
+        newApproverDeadline
+      ),
+      "Owner and heir cannot be same."
+    );
+  });
+
+  it("Should not create the contract with wrong parameters part 5.", async () => {
+    await expectRevert(
+      Inherichain.new(
+        owner,
+        backupOwner,
+        constants.ZERO_ADDRESS,
+        [approverOne, approverTwo, approverThree],
+        newDeadline,
+        newApproverDeadline
+      ),
+      "Heir has to be set at the time of contract creation."
+    );
+  });
+
+  it("Should not create the contract with wrong parameters part 6.", async () => {
+    await expectRevert(
+      Inherichain.new(
+        owner,
+        backupOwner,
+        heir,
+        [approverOne, approverOne],
+        newDeadline,
+        newApproverDeadline
+      ),
+      "Approver already added."
+    );
+  });
+
   it("Updating Backup Owner by Owner should be possible.", async () => {
     const cOldBackupOwner = await inherichain.backupOwner();
     await inherichain.updateBackupOwner(newBackupOwner);
@@ -1102,6 +1231,30 @@ contract("Inherichain", (accounts) => {
       signature +
       web3.utils.toHex(valueToUpdate).slice(2).padStart(64, "0") +
       demo.address.slice(2).padStart(64, "0");
+    await web3.eth
+      .sendTransaction({
+        from: outsider,
+        to: inherichain.address,
+        // value: ???,
+        // gas: ???,
+        // gasPrice: ???,
+        data: msgData,
+      })
+      .then(() => {
+        assert(false);
+      }) // Should not have succeeded.
+      .catch(() => {
+        assert(true);
+      }); // Should have failed.
+  });
+
+  it("Fallback function should have a non zero address as contract address.", async () => {
+    const valueToUpdate = randomValue();
+    const signature = web3.utils.sha3("set(uint256)").slice(0, 10);
+    const msgData =
+      signature +
+      web3.utils.toHex(valueToUpdate).slice(2).padStart(64, "0") +
+      constants.ZERO_ADDRESS.slice(2).padStart(64, "0");
     await web3.eth
       .sendTransaction({
         from: owner,
