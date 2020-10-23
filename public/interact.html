@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Inherichain - Interact with Wallet!</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="interact.js"></script>
+	<style>
+		h1, h3 {
+			margin-top: 3%;
+		}
+
+		h5 {
+			margin-top: 3%;
+		}
+
+		label {
+			margin-top: 20px;
+		}
+
+	</style>
+</head>
+
+<body>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="/">Inherichain</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+		  <span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+		  <div class="navbar-nav">
+			<a class="nav-item nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
+			<a class="nav-item nav-link" href="deploy.html">Deploy</a>
+			<a class="nav-item nav-link" href="interact.html">Interact</a>
+		  </div>
+		</div>
+	  </nav>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Interact with your Wallet Contract</h1>
+				<div class="row">
+					<div class="col-sm-12">
+						<form id="setAddress">
+							<div class="form-group">
+								<label for="walletAddress">Wallet Contract Address :</label>
+								<input id="walletAddress" type="text" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-info">Interact</button>
+							<div id="interactStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<hr>
+				<hr>
+				<h3>Current Status :</h3>
+				<div class="row">
+					<div class="col-sm-6">
+						User Balance : <div id="currentUserBalance">0</div>ETH
+					</div>
+					<div class="col-sm-6">
+						Contract Balance : <div id="currentContractBalance">0</div>ETH
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						Owner : <div id="currentOwner"></div>
+					</div>
+					<div class="col-sm-6">
+						Backup Owner : <div id="currentBackupOwner"></div>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						Heir : <div id="currentHeir"></div>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						Approver 1 : <div id="currentApproverOne"></div>
+					</div>
+					<div class="col-sm-6">
+						Approver 2 : <div id="currentApproverTwo"></div>
+					</div>
+					<div class="col-sm-6">
+						Approver 3 : <div id="currentApproverThree"></div>
+					</div>
+					<div class="col-sm-6">
+						Approver Count : <div id="currentApproverCount"></div>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						Deadline (in Seconds) : <div id="currentDeadline"></div>
+					</div>
+					<div class="col-sm-6">
+						Approver Deadline (in Seconds) : <div id="currentApproverDeadline"></div>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						Claim Started : <div id="currentClaimStartedStatus"></div>
+					</div>
+					<div class="col-sm-6">
+						Claim Status : <div id="currentClaimStatus"></div>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						Claim Time (in Seconds) : <div id="currentClaimTime"></div>
+					</div>
+					<div class="col-sm-6">
+						Vote Count : <div id="currentVoteCount"></div>
+					</div>
+				</div>
+				<hr>
+				<hr>
+				<hr>
+				<h3>Welcome User!</h3>
+				<div class="row">
+					<div class="col-sm-12">
+						<h5>Deposit</h5>
+						<form id="userDepositETH">
+							<div class="form-group">
+								<label for="amountUser">Enter ETH Amount :</label>
+								<input type="number" id="amountUser" class="form-control" step="any">
+							</div>
+							<button type="submit" class="btn btn-success">Deposit</button>
+							<div id="userDepositStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<hr>
+				<hr>
+				<h3>Welcome Owner!</h3>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						<h5>Update Backup Owner</h5>
+						<form id="ownerUpdateBackupOwner">
+							<div class="form-group">
+								<label for="updateBackupOwner">Enter New Backup Owner Address :</label>
+								<input type="text" id="updateBackupOwner" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-secondary">Update</button>
+							<div id="ownerUpdateBackupOwnerStatus"></div>
+						</form>
+					</div>
+					<div class="col-sm-6">
+						<h5>Update Heir</h5>
+						<form id="ownerUpdateHeir">
+							<div class="form-group">
+								<label for="updateHeir">Enter New Heir Address :</label>
+								<input type="text" id="updateHeir" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-secondary">Update</button>
+							<div id="ownerUpdateHeirStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						<h5>Add New Approver</h5>
+						<form id="ownerAddApprover">
+							<div class="form-group">
+								<label for="addApprover">Enter New Approver Address :</label>
+								<input type="text" id="addApprover" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-primary">Add</button>
+							<div id="ownerAddApproverStatus"></div>
+						</form>
+					</div>
+					<div class="col-sm-6">
+						<h5>Delete Approver</h5>
+						<form id="ownerDeleteApprover">
+							<div class="form-group">
+								<label for="deleteApprover">Enter Approver Address to Delete :</label>
+								<input type="text" id="deleteApprover" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-danger">Delete</button>
+							<div id="ownerDeleteApproverStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-12">
+						<form id="ownerUpdateDeadline">
+							<h5>Update Deadline & Approver Deadline</h5>
+							<div class="form-group">
+								<label for="updateDeadline">Enter New Deadline Duration (in seconds) :</label>
+								<input type="text" id="updateDeadline" class="form-control" placeholder="Leave Blank to only update Approver Deadline">
+								<label for="updateApproverDeadline">Enter New Approver Deadline Duration (in seconds) :</label>
+								<input type="text" id="updateApproverDeadline" class="form-control" placeholder="Leave Blank to only update Deadline">
+							</div>
+							<button type="submit" class="btn btn-secondary">Update</button>
+							<div id="ownerUpdateDeadlineStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-5">
+						<h5>Transfer ETH</h5>
+						<form id="ownerTransferSomeETH">
+							<div class="form-group">
+								<label for="transferSomeETHAmount">Enter ETH to transfer :</label>
+								<input type="number" id="transferSomeETHAmount" class="form-control" step="any">
+								<label for="transferSomeETHAddress">Enter the receiver address :</label>
+								<input type="text" id="transferSomeETHAddress" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-success">Update</button>
+							<div id="ownerTransferSomeETHStatus"></div>
+						</form>
+					</div>
+					<div class="col-sm-4">
+						<h5>Withdraw ETH</h5>
+						<form id="ownerWithdrawSomeETH">
+							<div class="form-group">
+								<label for="withdrawSomeETH">Enter ETH to withdraw :</label>
+								<input type="number" id="withdrawSomeETH" class="form-control" step="any">
+							</div>
+							<button type="submit" class="btn btn-success">Withdraw</button>
+							<div id="ownerWithdrawSomeETHStatus"></div>
+						</form>
+					</div>
+					<div class="col-sm-3">
+						<h5>Withdraw All ETH</h5>
+						<form id="ownerWithdrawAllETH">
+							<div class="form-group">
+								<label for="withdrawAllETH">Click to withdraw All ETH.</label>
+							</div>
+							<button type="submit" class="btn btn-success">Withdraw</button>
+							<div id="ownerWithdrawAllETHStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-6">
+						<form id="ownerInteract">
+							<h5>Interact with other contract (Fallback function)</h5>
+							<div class="form-group">
+								<label for="addMsgValue">Enter Value to Sent (in ETH) :</label>
+								<input type="number" id="addMsgValue" class="form-control" step="any">
+								<label for="addMsgData">Enter Message Data :</label>
+								<input type="text" id="addMsgData" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-secondary">Interact</button>
+							<div id="ownerInteractStatus"></div>
+						</form>
+					</div>
+					<div class="col-sm-6">
+						<form id="ownerDeployContract">
+							<h5>Deploy Contract</h5>
+							<div class="form-group">
+								<label for="addContractValue">Enter Value to Sent (in ETH) :</label>
+								<input type="number" id="addContractValue" class="form-control" step="any">
+								<label for="addContractBytecode">Enter Contract Bytecode :</label>
+								<input type="text" id="addContractBytecode" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-primary">Create</button>
+							<div id="ownerDeployContractStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<hr>
+				<hr>
+				<h3>Welcome Backup Owner!</h3>
+				<div class="row">
+					<div class="col-sm-12">
+						<h5>Update Owner</h5>
+						<form id="backupOwnerUpdateOwner">
+							<div class="form-group">
+								<label for="updateOwner">Enter New Owner Address :</label>
+								<input type="text" id="updateOwner" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-secondary">Update</button>
+							<div id="backupOwnerUpdateOwnerStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<hr>
+				<hr>
+				<h3>Welcome Heir!</h3>
+				<div class="row">
+					<div class="col-sm-12">
+						<h5>Claim Ownership</h5>
+						<form id="heirClaimOwnership">
+							<div class="form-group">
+								<label for="startClaim">Start Claim Process.</label>
+							</div>
+							<button type="submit" class="btn btn-secondary">Claim</button>
+							<div id="heirClaimOwnershipStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-12">
+						<h5>Access Ownership from Approver</h5>
+						<form id="accessWalletApprover">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-sm-6">
+										<label for="setBackupOwner">Backup Owner :</label>
+										<input id="setBackupOwner" type="text" class="form-control" placeholder="Leave blank if no backup owner.">
+									</div>
+									<div class="col-sm-6">
+										<label for="setHeir">Heir :</label>
+										<input id="setHeir" type="text" class="form-control" placeholder="Enter heir address." required>		
+									</div>
+								</div>
+								<br>
+								<div class="row">
+									<div class="col-sm-4">
+										<label for="setApproverOne">Approver 1 :</label>
+										<input id="setApproverOne" type="text" class="form-control" placeholder="Enter Approver One Address.">
+									</div>
+									<div class="col-sm-4">
+										<label for="setApproverTwo">Approver 2 :</label>
+										<input id="setApproverTwo" type="text" class="form-control" placeholder="Enter Approver Two Address.">
+									</div>
+									<div class="col-sm-4">
+										<label for="setApproverThree">Approver 3 :</label>
+										<input id="setApproverThree" type="text" class="form-control" placeholder="Enter Approver Three Address.">
+									</div>
+								</div>
+								<br>
+								<div class="row">
+									<div class="col-sm-6">
+										<label for="setDeadline">Deadline :</label>
+										<input id="setDeadline" type="number" class="form-control" placeholder="Enter deadline duration." step="any">
+									</div>
+									<div class="col-sm-6">
+										<label for="setApproverDeadline">Approver Deadline :</label>
+										<input id="setApproverDeadline" type="number" class="form-control" placeholder="Enter approver deadline duration." step="any">
+									</div>
+								</div>
+							</div>
+							<button type="submit" class="btn btn-primary">Access</button>
+							<div id="accessWalletApproverStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div class="row">
+					<div class="col-sm-12">
+						<h5>Access Ownership after Deadline</h5>
+						<form id="accessWalletDeadline">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-sm-6">
+										<label for="setBackupOwner">Backup Owner :</label>
+										<input id="setBackupOwner" type="text" class="form-control" placeholder="Leave blank if no backup owner.">
+									</div>
+									<div class="col-sm-6">
+										<label for="setHeir">Heir :</label>
+										<input id="setHeir" type="text" class="form-control" placeholder="Enter heir address." required>		
+									</div>
+								</div>
+								<br>
+								<div class="row">
+									<div class="col-sm-4">
+										<label for="setApproverOne">Approver 1 :</label>
+										<input id="setApproverOne" type="text" class="form-control" placeholder="Enter Approver One Address.">
+									</div>
+									<div class="col-sm-4">
+										<label for="setApproverTwo">Approver 2 :</label>
+										<input id="setApproverTwo" type="text" class="form-control" placeholder="Enter Approver Two Address.">
+									</div>
+									<div class="col-sm-4">
+										<label for="setApproverThree">Approver 3 :</label>
+										<input id="setApproverThree" type="text" class="form-control" placeholder="Enter Approver Three Address.">
+									</div>
+								</div>
+								<br>
+								<div class="row">
+									<div class="col-sm-6">
+										<label for="setDeadline">Deadline :</label>
+										<input id="setDeadline" type="number" class="form-control" placeholder="Enter deadline duration." step="any">		
+									</div>
+									<div class="col-sm-6">
+										<label for="setApproverDeadline">Approver Deadline :</label>
+										<input id="setApproverDeadline" type="number" class="form-control" placeholder="Enter approver deadline duration." step="any">
+									</div>
+								</div>
+							</div>
+							<button type="submit" class="btn btn-primary">Access</button>
+							<div id="accessWalletDeadlineStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<hr>
+				<hr>
+				<h3>Welcome Approver!</h3>
+				<div class="row">
+					<div class="col-sm-12">
+						<h5>Approve or Reject Heir</h5>
+						<form id="approverAcceptance">
+							<div class="form-group">
+								<label for="acceptHeir">Accept</label>
+								<input type="number" id="acceptHeir" placeholder="0 = Reject and 1 = Accept.">
+							</div>
+							<button type="submit" class="btn btn-secondary">Vote</button>
+							<div id="approverAcceptanceStatus"></div>
+						</form>
+					</div>
+				</div>
+				<hr>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

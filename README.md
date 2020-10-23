@@ -62,7 +62,7 @@ A basic description of all the functions, modifiers, and events are specified in
 
 7. (Optional) If you want, you can run the `truffle test` to see if it passes all tests or not.
 
-8. TODO - Frontend Part
+8. To run the frontend part, just use `npm start` and it will start a server in localhost.
 
 ## How to Test the Contract
 
