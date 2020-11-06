@@ -561,7 +561,7 @@ contract Inherichain {
         for (uint256 user = 0; user < _approvers.length; user++) {
             addApprover(_approvers[user]);
         }
-        deadlineUpdated(_deadline, _approverDeadline, msg.sender);
+        updateDeadline(_deadline, _approverDeadline);
         emit ownershipAccessed(
             msg.sender,
             _backupOwner,
