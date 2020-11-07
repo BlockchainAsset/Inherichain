@@ -8,19 +8,23 @@ pragma solidity 0.7.0;
 contract Inherichain {
     /*  Contract Variables  */
 
-    bool public claimStarted; // It marks whether the claim by the heir has started or not.
-    bool public claimStatus; // It marks whether the claim was approved by the approvers or not.
-
     uint256 public voteCount; // This counts the yes votes for a heir claim.
     uint256 public claimTime; // The time when the claim was started. Default is zero. Set at the time of claim call.
+    uint256 public charityTime; // The time when the charity was initiated. Default is zero. Set at the time of initiation.
     // Below deadline can be changed at the time of contract creation.
     // Deadline also works for owner to reclaim if the heir colluded with approvers.
     uint256 public heirDeadline = 30 days; // Wait time for the heir without approvers approval. Default is 30 days.
     uint256 public heirApprovedDeadline = 7 days; // Wait time for the heir with approvers approval. Default is 7 days.
+    uint256 public charityDeadline = 45 days;
 
     address public owner; // The owner of this contract wallet.
     address public backupOwner; // The backup owner, same as owner of this wallet, but with a different address.
     address public heir; // The heir of this contract.
+    address public charity;
+    address public charityInitiator;
+
+    enum Status {Initial, HeirClaimed, ApproverApproved, InitiatedCharity}
+    Status public status;
 
     mapping(address => bool) public approverStatus; // Whether the approver is valid or not.
     mapping(address => bool) public voted; // Whether the approver has voted or not.
@@ -33,16 +37,20 @@ contract Inherichain {
     ///	@param _owner The owner of this contract.
     ///	@param _backupOwner The backup owner of this contract.
     ///	@param _heir The heir of this contract.
+    /// @param _charity The charity address preferred by Owner.
     ///	@param _approverCount The no. of approvers added to the contract.
     ///	@param _heirDeadline The wait time for heir to claim without approval from approvers.
     ///	@param _heirApprovedDeadline The wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     event contractCreated(
         address indexed _owner,
         address indexed _backupOwner,
         address indexed _heir,
+        address _charity,
         uint256 _approverCount,
         uint256 _heirDeadline,
-        uint256 _heirApprovedDeadline
+        uint256 _heirApprovedDeadline,
+        uint256 _charityDeadline
     );
 
     ///	@dev This event is used to notify that the backup owner has been updated.
@@ -58,14 +66,21 @@ contract Inherichain {
     ///	@param _owner The owner who made this change.
     event heirUpdated(address indexed _newHeir, address indexed _owner);
 
+    ///	@dev The event is used to notify that the charity has been updated.
+    ///	@param _charity The new charity address.
+    ///	@param _changer The one who made the change. It can be either owner or approver.
+    event charityUpdated(address indexed _charity, address indexed _changer);
+
     ///	@dev The event is used to notify a change in the deadline.
     ///	@param _heirDeadline The wait time for heir to claim without approval from approvers.
     ///	@param _heirApprovedDeadline The wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     ///	@param _owner The owner who made this change.
     event deadlineUpdated(
         uint256 indexed _heirDeadline,
         uint256 indexed _heirApprovedDeadline,
-        address indexed _owner
+        uint256 indexed _charityDeadline,
+        address _owner
     );
 
     ///	@dev The event is used to notify an addition to the approver list.
@@ -104,13 +119,15 @@ contract Inherichain {
     ///	@param _approverCount The no. of new approvers added to the contract.
     ///	@param _heirDeadline The new wait time for heir to claim without approval from approvers.
     ///	@param _heirApprovedDeadline The new wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     event ownershipAccessed(
         address indexed _newOwner,
         address indexed _newBackupOwner,
         address indexed _heir,
         uint256 _approverCount,
         uint256 _heirDeadline,
-        uint256 _heirApprovedDeadline
+        uint256 _heirApprovedDeadline,
+        uint256 _charityDeadline
     );
 
     ///	@dev This event is used to notify the decision by the approver.
@@ -121,6 +138,10 @@ contract Inherichain {
     ///	@dev This event is used to notify when the approval is successful.
     ///	@param _approveCount The no. of votes received by the heir for approval.
     event heirApproved(uint256 indexed _approveCount);
+
+    ///	@dev The event is used to notify that charity process has been initiated.
+    ///	@param _approver The one who initiated the process.
+    event charityInitiated(address indexed _approver);
 
     ///	@dev The event is used to notify the creation of a contract.
     ///	@param _contractAddress The newly created contract address.
@@ -199,16 +220,20 @@ contract Inherichain {
     ///	@param _owner The owner of this contract.
     ///	@param _backupOwner The backup owner of this contract.
     ///	@param _heir The heir of this contract.
+    /// @param _charity The charity address preferred by Owner.
     ///	@param _approvers The approver address array added to the contract.
     ///	@param _deadline The wait time for heir to claim without approval from approvers.
     ///	@param _approverDeadline The wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     constructor(
         address _owner,
         address _backupOwner,
         address _heir,
+        address _charity,
         address[] memory _approvers,
         uint256 _deadline,
-        uint256 _approverDeadline
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
     ) {
         owner = _owner; // By default owner will be assigned the constructor parameter.
         if (_owner == address(0)) {
@@ -235,6 +260,11 @@ contract Inherichain {
         );
         heir = _heir;
 
+        if(_charity != address(0)){
+            // We set charity address only if constructor parameter is assigned with one.
+            charity = _charity;
+        }
+
         for (uint256 user = 0; user < _approvers.length; user++) {
             // To add approver only once.
             require(
@@ -253,13 +283,19 @@ contract Inherichain {
             heirApprovedDeadline = _approverDeadline;
         }
 
+        if (_charityDeadline != 0) {
+            charityDeadline = _charityDeadline;
+        }
+
         emit contractCreated(
             owner,
-            backupOwner,
-            heir,
+            _backupOwner,
+            _heir,
+            _charity,
             _approvers.length,
             heirDeadline,
-            heirApprovedDeadline
+            heirApprovedDeadline,
+            charityDeadline
         );
     }
 
@@ -302,17 +338,31 @@ contract Inherichain {
             }
         }
         voteCount = 0; // This resets the vote count, if the approver and colluded with the heir.
-        claimStarted = false; // This resets the claim ownership from heir.
         claimTime = 0;
-        claimStatus = false; // This ensures the new heir which is set cannot claim the ownership without approvers.
+        status = Status.Initial;
         emit heirUpdated(_newHeir, msg.sender);
+    }
+
+    /// @notice Can be used to update the Charity Address by the Owner. Also reset a initiated charity by Approver.
+    /// @dev If the charity address is predetermined by owner, then approver cannot nominate a charity.
+    /// @param _charity The address of the charity.
+    function updateCharity(address _charity) public onlyOwner checkAddress(_charity) {
+        charity = _charity;
+        if(charityTime != 0){
+            // Resets the charity initiation if initiated by approver.
+            status = Status.Initial;
+            charityTime = 0;
+            deleteApprover(charityInitiator);
+        }
+        emit charityUpdated(_charity, msg.sender);
     }
 
     ///	@notice Can be used to update the deadlines.
     ///	@dev If only one deadline has to be updated, passing the other zero is enough.
     ///	@param _deadline The deadline without approval.
     ///	@param _approverDeadline The deadline with approval.
-    function updateDeadline(uint256 _deadline, uint256 _approverDeadline)
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
+    function updateDeadline(uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)
         public
         onlyOwner
     {
@@ -322,7 +372,10 @@ contract Inherichain {
         if (_approverDeadline != 0) {
             heirApprovedDeadline = _approverDeadline;
         }
-        emit deadlineUpdated(heirDeadline, heirApprovedDeadline, msg.sender);
+        if (_charityDeadline != 0) {
+            charityDeadline = _charityDeadline;
+        }
+        emit deadlineUpdated(_deadline, _approverDeadline, _charityDeadline, msg.sender);
     }
 
     ///	@notice Can be used to add an approver.
@@ -346,7 +399,7 @@ contract Inherichain {
         require(approverStatus[_approver], "Approver is not valid.");
         approverStatus[_approver] = false;
         uint256 count = approvers.length;
-        uint256 index = count;
+        uint256 index;
         for (uint256 i = 0; i < count; i++) {
             if (approvers[i] == _approver) {
                 index = i;
@@ -378,7 +431,7 @@ contract Inherichain {
             let result := call(
                 gas(),
                 contractAddr,
-                callvalue(),
+                callvalue(), // TODO Get Value to be used from Contract as well.
                 ptr,
                 actualcalldatasize,
                 0,
@@ -475,9 +528,18 @@ contract Inherichain {
     ///	@notice Can be used to claim the contract ownership.
     ///	@dev This function starts the claim process for heir.
     function claimOwnership() public onlyHeir {
-        require(!claimStarted, "Claim already started.");
-        claimStarted = true;
+        require(status != Status.HeirClaimed, "Claim already started.");
+        _claimOwnership();
+    }
+
+    /// @notice This is an internal function which takes care of the heir claim process.
+    function _claimOwnership() internal {
+        status = Status.HeirClaimed;
         claimTime = block.timestamp;
+        if(charityTime != 0){
+            charityTime = 0; // Resets the charity initiation if initiated by approver.
+            // Charity Status is automatically changed when Heir Claims.
+        }
         emit ownershipClaimed(msg.sender, claimTime);
     }
 
@@ -488,14 +550,16 @@ contract Inherichain {
     ///	@param _approvers The new approver address array added to the contract.
     ///	@param _deadline The new wait time for heir to claim without approval from approvers.
     ///	@param _approverDeadline The new wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function accessOwnershipFromApprover(
         address _backupOwner,
         address _heir,
         address[] memory _approvers,
         uint256 _deadline,
-        uint256 _approverDeadline
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
     ) public onlyHeir {
-        require(claimStatus, "Majority vote required to access ownership.");
+        require(status == Status.ApproverApproved, "Majority vote required to access ownership.");
         require(
             block.timestamp - claimTime > heirApprovedDeadline,
             "Deadline has not passed."
@@ -505,7 +569,8 @@ contract Inherichain {
             _heir,
             _approvers,
             _deadline,
-            _approverDeadline
+            _approverDeadline,
+            _charityDeadline
         );
     }
 
@@ -516,12 +581,14 @@ contract Inherichain {
     ///	@param _approvers The new approver address array added to the contract.
     ///	@param _deadline The new wait time for heir to claim without approval from approvers.
     ///	@param _approverDeadline The new wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function accessOwnershipAfterDeadline(
         address _backupOwner,
         address _heir,
         address[] memory _approvers,
         uint256 _deadline,
-        uint256 _approverDeadline
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
     ) public onlyHeir {
         require(
             block.timestamp - claimTime > heirDeadline,
@@ -532,7 +599,8 @@ contract Inherichain {
             _heir,
             _approvers,
             _deadline,
-            _approverDeadline
+            _approverDeadline,
+            _charityDeadline
         );
     }
 
@@ -542,15 +610,16 @@ contract Inherichain {
     ///	@param _approvers The new approver address array added to the contract.
     ///	@param _deadline The new wait time for heir to claim without approval from approvers.
     ///	@param _approverDeadline The new wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function _accessOwnership(
         address _backupOwner,
         address _heir,
         address[] memory _approvers,
         uint256 _deadline,
-        uint256 _approverDeadline
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
     ) internal {
-        require(claimStarted, "Claim was not started.");
-        claimStatus = false;
+        status = Status.Initial;
         owner = msg.sender;
         updateBackupOwner(_backupOwner);
         updateHeir(_heir);
@@ -561,14 +630,15 @@ contract Inherichain {
         for (uint256 user = 0; user < _approvers.length; user++) {
             addApprover(_approvers[user]);
         }
-        updateDeadline(_deadline, _approverDeadline);
+        updateDeadline(_deadline, _approverDeadline, _charityDeadline);
         emit ownershipAccessed(
             msg.sender,
             _backupOwner,
             _heir,
             _approvers.length,
             _deadline,
-            _approverDeadline
+            _approverDeadline,
+            _charityDeadline
         );
     }
 
@@ -578,17 +648,60 @@ contract Inherichain {
     ///	@dev Only callable if claim has started and approver not already voted.
     ///	@param _acceptance True if approved, False otherwise.
     function approveHeir(bool _acceptance) public onlyApprover {
-        require(claimStarted, "Claim has not started yet.");
+        require(status == Status.HeirClaimed, "Claim has not started yet.");
         require(!voted[msg.sender], "Already voted.");
         voted[msg.sender] = true;
         if (_acceptance) {
             voteCount++;
             if (voteCount > approvers.length / 2) {
-                claimStatus = true;
+                status = Status.ApproverApproved;
                 emit heirApproved(voteCount);
             }
         }
         emit heirApproval(msg.sender, _acceptance);
+    }
+
+    function initiateCharity() public onlyApprover {
+        require(status == Status.Initial, "Contract Status is not apt for charity initiation.");
+        require(charity != address(0), "Charity was not set by Owner.");
+        status = Status.InitiatedCharity;
+        charityTime = block.timestamp;
+        charityInitiator = msg.sender;
+        emit charityInitiated(msg.sender);
+    }
+
+    /* Charity Function */
+
+    ///	@notice Can be used by charity after deadline has been passed.
+    ///	@dev This function can only be called after the approver has initiated the charity.
+    ///	@param _backupOwner The new backup owner of this contract.
+    ///	@param _heir The new heir of this contract.
+    ///	@param _approvers The new approver address array added to the contract.
+    ///	@param _deadline The new wait time for heir to claim without approval from approvers.
+    ///	@param _approverDeadline The new wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
+    function accessOwnershipFromCharity(
+        address _backupOwner,
+        address _heir,
+        address[] memory _approvers,
+        uint256 _deadline,
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
+    ) public {
+        require(charity == msg.sender, "Only the charity wallet can call this function.");
+        require(status == Status.InitiatedCharity, "Charity is not yet initiated.");
+        require(
+            block.timestamp - charityTime > charityDeadline,
+            "Deadline has not passed."
+        );
+        _accessOwnership(
+            _backupOwner,
+            _heir,
+            _approvers,
+            _deadline,
+            _approverDeadline,
+            _charityDeadline
+        );
     }
 
     /*  Read/Getter Functions  */

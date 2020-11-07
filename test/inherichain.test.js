@@ -23,6 +23,7 @@ contract("Inherichain", (accounts) => {
   let owner,
     backupOwner,
     heir,
+    charity,
     approverOne,
     approverTwo,
     approverThree,
@@ -32,10 +33,16 @@ contract("Inherichain", (accounts) => {
     newApproverTwo,
     newApproverThree,
     outsider;
+  const sInitial = 0;
+  const sHeirClaimed = 1;
+  const sApproverApproved = 2;
+  const sInitiatedCharity = 3;
   const deadline = time.duration.days(30).toNumber();
   const approverDeadline = time.duration.days(7).toNumber();
+  const charityDeadline = time.duration.days(45).toNumber();
   const newDeadline = time.duration.days(60).toNumber();
   const newApproverDeadline = time.duration.days(14).toNumber();
+  const newCharityDeadline = time.duration.days(90).toNumber();
   const demoBytecode =
     "0x608060405234801561001057600080fd5b506101af806100206000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80633fa4f2451461005157806360fe47b11461006f5780636d4ce63c146100b3578063767800de146100d1575b600080fd5b610059610105565b6040518082815260200191505060405180910390f35b61009b6004803603602081101561008557600080fd5b810190808035906020019092919050505061010b565b60405180821515815260200191505060405180910390f35b6100bb61014a565b6040518082815260200191505060405180910390f35b6100d9610153565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60005481565b600081600081905550817f44772b8c37c7d91700fb4f50422a6a6a1419a2b1360e62218c26998c1b2e02c160405160405180910390a260019050919050565b60008054905090565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea264697066735822122012df8d70209ff3a7bcf7e7681d6c5bb2ed5f1eba9fab9b8928dfe0a473e2a27964736f6c63430007000033";
   const transferValue = new BN(web3.utils.toWei("0.5", "ether"));
@@ -44,18 +51,20 @@ contract("Inherichain", (accounts) => {
   before("Initiating Accounts.", async () => {
     assert.isAtLeast(
       accounts.length,
-      12,
-      "Atleast 12 Accounts are required to test the contracts."
+      14,
+      "Atleast 14 Accounts are required to test the contracts."
     );
     [
       owner,
       backupOwner,
       heir,
+      charity,
       approverOne,
       approverTwo,
       approverThree,
       newBackupOwner,
       newHeir,
+      newCharity,
       newApproverOne,
       newApproverTwo,
       newApproverThree,
@@ -71,7 +80,9 @@ contract("Inherichain", (accounts) => {
       owner,
       backupOwner,
       heir,
+      charity,
       [approverOne, approverTwo, approverThree],
+      0,
       0,
       0
     );
@@ -130,18 +141,22 @@ contract("Inherichain", (accounts) => {
 
   it("Should create the contract correctly part 2.", async () => {
     inherichain = await Inherichain.new(
+      newHeir,
       constants.ZERO_ADDRESS,
-      backupOwner,
       heir,
+      constants.ZERO_ADDRESS,
       [approverOne, approverTwo, approverThree],
       newDeadline,
-      newApproverDeadline
+      newApproverDeadline,
+      newCharityDeadline
     );
     const cHeirDeadline = await inherichain.heirDeadline();
     const cHeirApprovedDeadline = await inherichain.heirApprovedDeadline();
+    const cCharityDeadline = await inherichain.charityDeadline();
     const cOwner = await inherichain.owner();
     const cBackupOwner = await inherichain.backupOwner();
     const cHeir = await inherichain.heir();
+    const cCharity = await inherichain.charity();
     const cApproverOneStatus = await inherichain.approverStatus(approverOne);
     const cApproverTwoStatus = await inherichain.approverStatus(approverTwo);
     const cApproverThreeStatus = await inherichain.approverStatus(
@@ -151,79 +166,22 @@ contract("Inherichain", (accounts) => {
     assert.strictEqual(
       cHeirDeadline.toNumber(),
       newDeadline,
-      "Default deadline is not set."
+      "Default deadline is set."
     );
     assert.strictEqual(
       cHeirApprovedDeadline.toNumber(),
       newApproverDeadline,
-      "Default approved deadline is not set."
+      "Default approved deadline is set."
     );
-    assert.strictEqual(cOwner, owner, "Owner set in contract is wrong.");
-    assert.strictEqual(
-      cBackupOwner,
-      backupOwner,
-      "Backup Owner set in contract is wrong."
-    );
-    assert.strictEqual(cHeir, heir, "Heir set in contract is wrong.");
-    assert.strictEqual(
-      cApproverOneStatus,
-      true,
-      "Approver One status not set correctly."
-    );
-    assert.strictEqual(
-      cApproverTwoStatus,
-      true,
-      "Approver Two status not set correctly."
-    );
-    assert.strictEqual(
-      cApproverThreeStatus,
-      true,
-      "Approver Three status not set correctly."
-    );
-    assert.strictEqual(
-      cApproversLength.toNumber(),
-      3,
-      "Approver Length in contract is wrong."
-    );
-  });
-
-  it("Should create the contract correctly part 3.", async () => {
-    inherichain = await Inherichain.new(
-      constants.ZERO_ADDRESS,
-      constants.ZERO_ADDRESS,
-      heir,
-      [approverOne, approverTwo, approverThree],
-      newDeadline,
-      newApproverDeadline
-    );
-    const cHeirDeadline = await inherichain.heirDeadline();
-    const cHeirApprovedDeadline = await inherichain.heirApprovedDeadline();
-    const cOwner = await inherichain.owner();
-    const cBackupOwner = await inherichain.backupOwner();
-    const cHeir = await inherichain.heir();
-    const cApproverOneStatus = await inherichain.approverStatus(approverOne);
-    const cApproverTwoStatus = await inherichain.approverStatus(approverTwo);
-    const cApproverThreeStatus = await inherichain.approverStatus(
-      approverThree
-    );
-    const cApproversLength = await inherichain.approversLength();
-    assert.strictEqual(
-      cHeirDeadline.toNumber(),
-      newDeadline,
-      "Default deadline is not set."
-    );
-    assert.strictEqual(
-      cHeirApprovedDeadline.toNumber(),
-      newApproverDeadline,
-      "Default approved deadline is not set."
-    );
-    assert.strictEqual(cOwner, owner, "Owner set in contract is wrong.");
+    assert.strictEqual(cCharityDeadline.toNumber(), newCharityDeadline, "Default charity deadline is set.");
+    assert.strictEqual(cOwner, newHeir, "Owner set in contract is wrong.");
     assert.strictEqual(
       cBackupOwner,
       constants.ZERO_ADDRESS,
       "Backup Owner set in contract is wrong."
     );
     assert.strictEqual(cHeir, heir, "Heir set in contract is wrong.");
+    assert.strictEqual(cCharity, constants.ZERO_ADDRESS, "Charity set in contract is wrong.");
     assert.strictEqual(
       cApproverOneStatus,
       true,
@@ -252,11 +210,29 @@ contract("Inherichain", (accounts) => {
         owner,
         owner,
         heir,
+        charity,
         [approverOne, approverTwo, approverThree],
         newDeadline,
-        newApproverDeadline
+        newApproverDeadline,
+        newCharityDeadline
       ),
       "Backup owner and owner cannot be same."
+    );
+  });
+
+  it("Should not create the contract with wrong parameters part 2.", async () => {
+    await expectRevert(
+      Inherichain.new(
+        owner,
+        backupOwner,
+        owner,
+        charity,
+        [approverOne, approverTwo, approverThree],
+        newDeadline,
+        newApproverDeadline,
+        newCharityDeadline
+      ),
+      "Owner and heir cannot be same."
     );
   });
 
@@ -265,10 +241,12 @@ contract("Inherichain", (accounts) => {
       Inherichain.new(
         owner,
         backupOwner,
-        owner,
+        backupOwner,
+        charity,
         [approverOne, approverTwo, approverThree],
         newDeadline,
-        newApproverDeadline
+        newApproverDeadline,
+        newCharityDeadline
       ),
       "Owner and heir cannot be same."
     );
@@ -279,12 +257,14 @@ contract("Inherichain", (accounts) => {
       Inherichain.new(
         owner,
         backupOwner,
-        backupOwner,
+        constants.ZERO_ADDRESS,
+        charity,
         [approverOne, approverTwo, approverThree],
         newDeadline,
-        newApproverDeadline
+        newApproverDeadline,
+        newCharityDeadline
       ),
-      "Owner and heir cannot be same."
+      "Heir has to be set at the time of contract creation."
     );
   });
 
@@ -293,24 +273,12 @@ contract("Inherichain", (accounts) => {
       Inherichain.new(
         owner,
         backupOwner,
-        constants.ZERO_ADDRESS,
-        [approverOne, approverTwo, approverThree],
-        newDeadline,
-        newApproverDeadline
-      ),
-      "Heir has to be set at the time of contract creation."
-    );
-  });
-
-  it("Should not create the contract with wrong parameters part 6.", async () => {
-    await expectRevert(
-      Inherichain.new(
-        owner,
-        backupOwner,
         heir,
+        charity,
         [approverOne, approverOne],
         newDeadline,
-        newApproverDeadline
+        newApproverDeadline,
+        newCharityDeadline
       ),
       "Approver already added."
     );
@@ -402,26 +370,24 @@ contract("Inherichain", (accounts) => {
   });
 
   it("Updating Heir should reset vote count and reset claim parameters.", async () => {
-    const cInitialClaimStarted = await inherichain.claimStarted();
+    const cInitialStatus = await inherichain.status();
     const cInitialClaimTime = await inherichain.claimTime();
     const cInitialVoteCount = await inherichain.voteCount();
-    const cInitialClaimStatus = await inherichain.claimStatus();
     await inherichain.claimOwnership({from: heir});
+    const cAfterClaimStatus = await inherichain.status();
+    const cOldClaimTime = await inherichain.claimTime();
     await inherichain.approveHeir(true, {from: approverOne});
     await inherichain.approveHeir(true, {from: approverTwo});
-    const cOldClaimStarted = await inherichain.claimStarted();
-    const cOldClaimTime = await inherichain.claimTime();
+    const cAfterApprovalStatus = await inherichain.status();
     const cOldVoteCount = await inherichain.voteCount();
-    const cOldClaimStatus = await inherichain.claimStatus();
     await inherichain.updateHeir(newHeir);
-    const cNewClaimStarted = await inherichain.claimStarted();
+    const cNewStatus = await inherichain.status();
     const cNewClaimTime = await inherichain.claimTime();
     const cNewVoteCount = await inherichain.voteCount();
-    const cNewClaimStatus = await inherichain.claimStatus();
     assert.strictEqual(
-      cInitialClaimStarted,
-      false,
-      "Claim should be false by default."
+      cInitialStatus.toNumber(),
+      sInitial,
+      "Default status should be Initial."
     );
     assert.strictEqual(
       cInitialClaimTime.toNumber(),
@@ -434,14 +400,9 @@ contract("Inherichain", (accounts) => {
       "Vote Count should be zero by default."
     );
     assert.strictEqual(
-      cInitialClaimStatus,
-      false,
-      "Claim Status should be false by default."
-    );
-    assert.strictEqual(
-      cOldClaimStarted,
-      true,
-      "Claim should be true after claim requested."
+      cAfterClaimStatus.toNumber(),
+      sHeirClaimed,
+      "Status should be HeirClaimed after Heir claims ownership."
     );
     assert.notStrictEqual(
       cOldClaimTime.toNumber(),
@@ -449,19 +410,19 @@ contract("Inherichain", (accounts) => {
       "Claim time should be non zero after claim."
     );
     assert.strictEqual(
+      cAfterApprovalStatus.toNumber(),
+      sApproverApproved,
+      "Status should be ApproverApproved after majority approver approves."
+    );
+    assert.strictEqual(
       cOldVoteCount.toNumber(),
       2,
       "Vote Count after two positive vote should be two."
     );
     assert.strictEqual(
-      cOldClaimStatus,
-      true,
-      "Claim Status should be true after approvers majority approval."
-    );
-    assert.strictEqual(
-      cNewClaimStarted,
-      false,
-      "Claim should be false after updating heir."
+      cNewStatus.toNumber(),
+      sInitial,
+      "Status should be Initial after heir reset."
     );
     assert.strictEqual(
       cNewClaimTime.toNumber(),
@@ -472,11 +433,6 @@ contract("Inherichain", (accounts) => {
       cNewVoteCount.toNumber(),
       0,
       "Vote Count should be zero after updating heir."
-    );
-    assert.strictEqual(
-      cNewClaimStatus,
-      false,
-      "Claim Status should be false after updating heir."
     );
   });
 
@@ -491,9 +447,11 @@ contract("Inherichain", (accounts) => {
   it("Updating both Deadline by Owner should be possible.", async () => {
     const cOldDeadline = await inherichain.heirDeadline();
     const cOldApproverDeadline = await inherichain.heirApprovedDeadline();
-    await inherichain.updateDeadline(newDeadline, newApproverDeadline);
+    const cOldCharityDeadline = await inherichain.charityDeadline();
+    await inherichain.updateDeadline(newDeadline, newApproverDeadline, newCharityDeadline);
     const cNewDeadline = await inherichain.heirDeadline();
     const cNewApproverDeadline = await inherichain.heirApprovedDeadline();
+    const cNewCharityDeadline = await inherichain.charityDeadline();
     assert.strictEqual(
       cOldDeadline.toNumber(),
       time.duration.days(30).toNumber(),
@@ -505,6 +463,11 @@ contract("Inherichain", (accounts) => {
       "Default approved deadline is wrong."
     );
     assert.strictEqual(
+      cOldCharityDeadline.toNumber(),
+      time.duration.days(45).toNumber(),
+      "Default charity deadline is wrong."
+    );
+    assert.strictEqual(
       cNewDeadline.toNumber(),
       newDeadline,
       "New deadline is wrong."
@@ -514,11 +477,16 @@ contract("Inherichain", (accounts) => {
       newApproverDeadline,
       "New approved deadline is wrong."
     );
+    assert.strictEqual(
+      cNewCharityDeadline.toNumber(),
+      newCharityDeadline,
+      "Default charity deadline is wrong."
+    );
   });
 
   it("Updating both Deadline by outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.updateDeadline(newDeadline, newApproverDeadline, {
+      inherichain.updateDeadline(newDeadline, newApproverDeadline, newCharityDeadline, {
         from: outsider,
       }),
       "Only owner can call this function."
@@ -527,9 +495,11 @@ contract("Inherichain", (accounts) => {
 
   it("Updating only heir Deadline by Owner should be possible.", async () => {
     const cOldApproverDeadline = await inherichain.heirApprovedDeadline();
-    await inherichain.updateDeadline(newDeadline, 0);
+    const cOldCharityDeadline = await inherichain.charityDeadline();
+    await inherichain.updateDeadline(newDeadline, 0, 0);
     const cNewDeadline = await inherichain.heirDeadline();
     const cNewApproverDeadline = await inherichain.heirApprovedDeadline();
+    const cNewCharityDeadline = await inherichain.charityDeadline();
     assert.strictEqual(
       cNewDeadline.toNumber(),
       newDeadline,
@@ -540,13 +510,20 @@ contract("Inherichain", (accounts) => {
       cOldApproverDeadline.toNumber(),
       "Approved deadline should not have been changed."
     );
+    assert.strictEqual(
+      cNewCharityDeadline.toNumber(),
+      cOldCharityDeadline.toNumber(),
+      "Charity deadline should not have been changed."
+    );
   });
 
   it("Updating only approval Deadline by Owner should be possible.", async () => {
     const cOldDeadline = await inherichain.heirDeadline();
-    await inherichain.updateDeadline(0, newApproverDeadline);
+    const cOldCharityDeadline = await inherichain.charityDeadline();
+    await inherichain.updateDeadline(0, newApproverDeadline, 0);
     const cNewDeadline = await inherichain.heirDeadline();
     const cNewApproverDeadline = await inherichain.heirApprovedDeadline();
+    const cNewCharityDeadline = await inherichain.charityDeadline();
     assert.strictEqual(
       cNewDeadline.toNumber(),
       cOldDeadline.toNumber(),
@@ -557,16 +534,23 @@ contract("Inherichain", (accounts) => {
       newApproverDeadline,
       "New approved deadline is wrong."
     );
+    assert.strictEqual(
+      cNewCharityDeadline.toNumber(),
+      cOldCharityDeadline.toNumber(),
+      "Charity deadline should not have been changed."
+    );
   });
 
   it("Updating Deadline should emit deadlineUpdated Event.", async () => {
     const receipt = await inherichain.updateDeadline(
       newDeadline,
-      newApproverDeadline
+      newApproverDeadline,
+      newCharityDeadline
     );
     expectEvent(receipt, "deadlineUpdated", {
       _heirDeadline: new BN(newDeadline),
       _heirApprovedDeadline: new BN(newApproverDeadline),
+      _charityDeadline: new BN(newCharityDeadline),
       _owner: owner,
     });
   });
@@ -717,15 +701,15 @@ contract("Inherichain", (accounts) => {
   });
 
   it("Claim ownership by Heir should be possible.", async () => {
-    const cOldClaimStarted = await inherichain.claimStarted();
+    const cOldStatus = await inherichain.status();
     const cOldClaimTime = await inherichain.claimTime();
     await inherichain.claimOwnership({from: heir});
-    const cNewClaimStarted = await inherichain.claimStarted();
+    const cNewStatus = await inherichain.status();
     const cNewClaimTime = await inherichain.claimTime();
     assert.strictEqual(
-      cOldClaimStarted,
-      false,
-      "Default Claim Start Status is Wrong."
+      cOldStatus.toNumber(),
+      sInitial,
+      "Default Status should be Initial."
     );
     assert.strictEqual(
       cOldClaimTime.toNumber(),
@@ -733,9 +717,9 @@ contract("Inherichain", (accounts) => {
       "Default Claim Start Time is Wrong."
     );
     assert.strictEqual(
-      cNewClaimStarted,
-      true,
-      "Updated Claim Start Status is Wrong."
+      cNewStatus.toNumber(),
+      sHeirClaimed,
+      "Updated Status after heir claim is Wrong."
     );
     assert.notStrictEqual(
       cNewClaimTime.toNumber(),
@@ -778,9 +762,10 @@ contract("Inherichain", (accounts) => {
       [newApproverOne, newApproverTwo, newApproverThree],
       newDeadline,
       newApproverDeadline,
+      newCharityDeadline,
       {from: heir}
     );
-    const cNewClaimStatus = await inherichain.claimStatus();
+    const cNewStatus = await inherichain.status();
     const cNewOwner = await inherichain.owner();
     const cNewBackupOwner = await inherichain.backupOwner();
     const cNewHeir = await inherichain.heir();
@@ -800,8 +785,8 @@ contract("Inherichain", (accounts) => {
       newApproverThree
     );
     assert.strictEqual(
-      cNewClaimStatus,
-      false,
+      cNewStatus.toNumber(),
+      sInitial,
       "Claim Status after majority voting is wrong."
     );
     assert.strictEqual(
@@ -865,6 +850,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: heir}
       ),
       "Majority vote required to access ownership."
@@ -882,6 +868,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: outsider}
       ),
       "Only heir can call this function."
@@ -897,6 +884,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: outsider}
       ),
       "Only heir can call this function."
@@ -914,6 +902,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: heir}
       ),
       "Deadline has not passed."
@@ -931,6 +920,7 @@ contract("Inherichain", (accounts) => {
       [newApproverOne, newApproverTwo, newApproverThree],
       newDeadline,
       newApproverDeadline,
+      newCharityDeadline,
       {from: heir}
     );
     expectEvent(receipt, "ownershipAccessed", {
@@ -952,9 +942,10 @@ contract("Inherichain", (accounts) => {
       [newApproverOne, newApproverTwo, newApproverThree],
       newDeadline,
       newApproverDeadline,
+      newCharityDeadline,
       {from: heir}
     );
-    const cNewClaimStatus = await inherichain.claimStatus();
+    const cNewStatus = await inherichain.status();
     const cNewOwner = await inherichain.owner();
     const cNewBackupOwner = await inherichain.backupOwner();
     const cNewHeir = await inherichain.heir();
@@ -974,9 +965,9 @@ contract("Inherichain", (accounts) => {
       newApproverThree
     );
     assert.strictEqual(
-      cNewClaimStatus,
-      false,
-      "Claim Status after majority voting is wrong."
+      cNewStatus.toNumber(),
+      sInitial,
+      "Status after ownership access is wrong."
     );
     assert.strictEqual(
       cNewOwner,
@@ -1039,6 +1030,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: heir}
       ),
       "Deadline has not passed."
@@ -1055,6 +1047,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: outsider}
       ),
       "Only heir can call this function."
@@ -1071,6 +1064,7 @@ contract("Inherichain", (accounts) => {
         [newApproverOne, newApproverTwo, newApproverThree],
         newDeadline,
         newApproverDeadline,
+        newCharityDeadline,
         {from: outsider}
       ),
       "Only heir can call this function."
@@ -1086,6 +1080,7 @@ contract("Inherichain", (accounts) => {
       [newApproverOne, newApproverTwo, newApproverThree],
       newDeadline,
       newApproverDeadline,
+      newCharityDeadline,
       {from: heir}
     );
     expectEvent(receipt, "ownershipAccessed", {
