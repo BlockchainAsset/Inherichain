@@ -1,6 +1,6 @@
 {
   "name": "inherichain",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A wallet which has inheritance built in on the Ethereum Blockchain.",
   "main": "truffle-config.js",
   "directories": {

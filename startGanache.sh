@@ -10,11 +10,11 @@ function startupGanache() {
         echo "Killing existing Ganache CLI process $GANACHE_PID"
         kill -9 $GANACHE_PID
 
-        ./node_modules/.bin/ganache-cli -m "$MNEMONIC" -a 12 > /dev/null &
+        ./node_modules/.bin/ganache-cli -m "$MNEMONIC" -a 15 > /dev/null &
         export GANACHE_PID=$!
         echo "Started new Ganache CLI as process $GANACHE_PID"
     else
-        ./node_modules/.bin/ganache-cli -m "$MNEMONIC" -a 12 > /dev/null &
+        ./node_modules/.bin/ganache-cli -m "$MNEMONIC" -a 15 > /dev/null &
         export GANACHE_PID=$!
         echo "Started new Ganache CLI as process $GANACHE_PID"
     fi
