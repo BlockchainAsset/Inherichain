@@ -43,7 +43,7 @@ Check if the contract have enough balance.
 
 
 
-### `constructor(address _owner, address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline)` (public)
+### `constructor(address _owner, address _backupOwner, address _heir, address _charity, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 
 
@@ -66,7 +66,15 @@ Can be used to update the heir.
 Can also be used if the heir tried to access contract before the owner demise along with approvers.
 
 
-### `updateDeadline(uint256 _deadline, uint256 _approverDeadline)` (public)
+### `updateCharity(address _charity)` (public)
+
+Can be used to update the Charity Address by the Owner. Also reset a initiated charity by Approver.
+
+
+If the charity address is predetermined by owner, then approver cannot nominate a charity.
+
+
+### `updateDeadline(uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 Can be used to update the deadlines.
 
@@ -146,7 +154,13 @@ Can be used to claim the contract ownership.
 
 This function starts the claim process for heir.
 
-### `accessOwnershipFromApprover(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline)` (public)
+### `_claimOwnership()` (internal)
+
+This is an internal function which takes care of the heir claim process.
+
+
+
+### `accessOwnershipFromApprover(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 Can be used by heir after approver approval.
 
@@ -154,7 +168,7 @@ Can be used by heir after approver approval.
 This function can only be called once majority vote is attained.
 
 
-### `accessOwnershipAfterDeadline(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline)` (public)
+### `accessOwnershipAfterDeadline(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 Can be used by heir after deadline has been passed.
 
@@ -162,7 +176,7 @@ Can be used by heir after deadline has been passed.
 This function can be called with or without the approver approvals after the deadline.
 
 
-### `_accessOwnership(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline)` (internal)
+### `_accessOwnership(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (internal)
 
 
 
@@ -177,6 +191,20 @@ Can be used to approve or reject a claim request by heir.
 Only callable if claim has started and approver not already voted.
 
 
+### `initiateCharity()` (public)
+
+
+
+
+
+### `accessOwnershipFromCharity(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
+
+Can be used by charity after deadline has been passed.
+
+
+This function can only be called after the approver has initiated the charity.
+
+
 ### `approversLength() → uint256 count` (public)
 
 To get the length of the approvers array.
@@ -186,7 +214,7 @@ Used for testing and frontend.
 
 
 
-### `contractCreated(address _owner, address _backupOwner, address _heir, uint256 _approverCount, uint256 _heirDeadline, uint256 _heirApprovedDeadline)`
+### `contractCreated(address _owner, address _backupOwner, address _heir, address _charity, uint256 _approverCount, uint256 _heirDeadline, uint256 _heirApprovedDeadline, uint256 _charityDeadline)`
 
 
 
@@ -207,7 +235,14 @@ This event is used to notify that the backup owner has been updated.
 The event is used to notify that the heir has been updated and any claim has been reset.
 
 
-### `deadlineUpdated(uint256 _heirDeadline, uint256 _heirApprovedDeadline, address _owner)`
+### `charityUpdated(address _charity, address _changer)`
+
+
+
+The event is used to notify that the charity has been updated.
+
+
+### `deadlineUpdated(uint256 _heirDeadline, uint256 _heirApprovedDeadline, uint256 _charityDeadline, address _owner)`
 
 
 
@@ -243,7 +278,7 @@ This event is used to notify the approvers to fast track approval process.
 This event is emitted when the heir has made a request for access to the contract.
 
 
-### `ownershipAccessed(address _newOwner, address _newBackupOwner, address _heir, uint256 _approverCount, uint256 _heirDeadline, uint256 _heirApprovedDeadline)`
+### `ownershipAccessed(address _newOwner, address _newBackupOwner, address _heir, uint256 _approverCount, uint256 _heirDeadline, uint256 _heirApprovedDeadline, uint256 _charityDeadline)`
 
 
 
@@ -262,6 +297,13 @@ This event is used to notify the decision by the approver.
 
 
 This event is used to notify when the approval is successful.
+
+
+### `charityInitiated(address _approver)`
+
+
+
+The event is used to notify that charity process has been initiated.
 
 
 ### `contractDeployed(address _contractAddress, address _owner)`

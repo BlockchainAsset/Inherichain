@@ -1,7 +1,13 @@
 const Inherichain = artifacts.require("Inherichain");
 
 module.exports = function (deployer, network, accounts) {
-  var owner, backupOwner, heir, charity, approverOne, approverTwo, approverThree;
+  var owner,
+    backupOwner,
+    heir,
+    charity,
+    approverOne,
+    approverTwo,
+    approverThree;
   [
     owner,
     backupOwner,

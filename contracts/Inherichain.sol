@@ -10,7 +10,7 @@ contract Inherichain {
 
     uint256 public voteCount; // This counts the yes votes for a heir claim.
     uint256 public claimTime; // The time when the claim was started. Default is zero. Set at the time of claim call.
-    uint256 public charityTime; // The time when the charity was initiated. Default is zero. Set at the time of initiation.
+    uint256 public charityTime; // The time when the charity was initiated. Set at the time of initiation.
     // Below deadline can be changed at the time of contract creation.
     // Deadline also works for owner to reclaim if the heir colluded with approvers.
     uint256 public heirDeadline = 30 days; // Wait time for the heir without approvers approval. Default is 30 days.
@@ -260,7 +260,7 @@ contract Inherichain {
         );
         heir = _heir;
 
-        if(_charity != address(0)){
+        if (_charity != address(0)) {
             // We set charity address only if constructor parameter is assigned with one.
             charity = _charity;
         }
@@ -346,9 +346,13 @@ contract Inherichain {
     /// @notice Can be used to update the Charity Address by the Owner. Also reset a initiated charity by Approver.
     /// @dev If the charity address is predetermined by owner, then approver cannot nominate a charity.
     /// @param _charity The address of the charity.
-    function updateCharity(address _charity) public onlyOwner checkAddress(_charity) {
+    function updateCharity(address _charity)
+        public
+        onlyOwner
+        checkAddress(_charity)
+    {
         charity = _charity;
-        if(charityTime != 0){
+        if (charityTime != 0) {
             // Resets the charity initiation if initiated by approver.
             status = Status.Initial;
             charityTime = 0;
@@ -362,10 +366,11 @@ contract Inherichain {
     ///	@param _deadline The deadline without approval.
     ///	@param _approverDeadline The deadline with approval.
     ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
-    function updateDeadline(uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)
-        public
-        onlyOwner
-    {
+    function updateDeadline(
+        uint256 _deadline,
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
+    ) public onlyOwner {
         if (_deadline != 0) {
             heirDeadline = _deadline;
         }
@@ -375,7 +380,12 @@ contract Inherichain {
         if (_charityDeadline != 0) {
             charityDeadline = _charityDeadline;
         }
-        emit deadlineUpdated(_deadline, _approverDeadline, _charityDeadline, msg.sender);
+        emit deadlineUpdated(
+            _deadline,
+            _approverDeadline,
+            _charityDeadline,
+            msg.sender
+        );
     }
 
     ///	@notice Can be used to add an approver.
@@ -536,7 +546,7 @@ contract Inherichain {
     function _claimOwnership() internal {
         status = Status.HeirClaimed;
         claimTime = block.timestamp;
-        if(charityTime != 0){
+        if (charityTime != 0) {
             charityTime = 0; // Resets the charity initiation if initiated by approver.
             // Charity Status is automatically changed when Heir Claims.
         }
@@ -559,7 +569,10 @@ contract Inherichain {
         uint256 _approverDeadline,
         uint256 _charityDeadline
     ) public onlyHeir {
-        require(status == Status.ApproverApproved, "Majority vote required to access ownership.");
+        require(
+            status == Status.ApproverApproved,
+            "Majority vote required to access ownership."
+        );
         require(
             block.timestamp - claimTime > heirApprovedDeadline,
             "Deadline has not passed."
@@ -662,7 +675,10 @@ contract Inherichain {
     }
 
     function initiateCharity() public onlyApprover {
-        require(status == Status.Initial, "Contract Status is not apt for charity initiation.");
+        require(
+            status == Status.Initial,
+            "Contract Status is not apt for charity initiation."
+        );
         require(charity != address(0), "Charity was not set by Owner.");
         status = Status.InitiatedCharity;
         charityTime = block.timestamp;
@@ -688,8 +704,14 @@ contract Inherichain {
         uint256 _approverDeadline,
         uint256 _charityDeadline
     ) public {
-        require(charity == msg.sender, "Only the charity wallet can call this function.");
-        require(status == Status.InitiatedCharity, "Charity is not yet initiated.");
+        require(
+            charity == msg.sender,
+            "Only the charity wallet can call this function."
+        );
+        require(
+            status == Status.InitiatedCharity,
+            "Charity is not yet initiated."
+        );
         require(
             block.timestamp - charityTime > charityDeadline,
             "Deadline has not passed."

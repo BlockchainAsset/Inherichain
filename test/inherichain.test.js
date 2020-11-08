@@ -173,7 +173,11 @@ contract("Inherichain", (accounts) => {
       newApproverDeadline,
       "Default approved deadline is set."
     );
-    assert.strictEqual(cCharityDeadline.toNumber(), newCharityDeadline, "Default charity deadline is set.");
+    assert.strictEqual(
+      cCharityDeadline.toNumber(),
+      newCharityDeadline,
+      "Default charity deadline is set."
+    );
     assert.strictEqual(cOwner, newHeir, "Owner set in contract is wrong.");
     assert.strictEqual(
       cBackupOwner,
@@ -181,7 +185,11 @@ contract("Inherichain", (accounts) => {
       "Backup Owner set in contract is wrong."
     );
     assert.strictEqual(cHeir, heir, "Heir set in contract is wrong.");
-    assert.strictEqual(cCharity, constants.ZERO_ADDRESS, "Charity set in contract is wrong.");
+    assert.strictEqual(
+      cCharity,
+      constants.ZERO_ADDRESS,
+      "Charity set in contract is wrong."
+    );
     assert.strictEqual(
       cApproverOneStatus,
       true,
@@ -448,7 +456,11 @@ contract("Inherichain", (accounts) => {
     const cOldDeadline = await inherichain.heirDeadline();
     const cOldApproverDeadline = await inherichain.heirApprovedDeadline();
     const cOldCharityDeadline = await inherichain.charityDeadline();
-    await inherichain.updateDeadline(newDeadline, newApproverDeadline, newCharityDeadline);
+    await inherichain.updateDeadline(
+      newDeadline,
+      newApproverDeadline,
+      newCharityDeadline
+    );
     const cNewDeadline = await inherichain.heirDeadline();
     const cNewApproverDeadline = await inherichain.heirApprovedDeadline();
     const cNewCharityDeadline = await inherichain.charityDeadline();
@@ -486,9 +498,14 @@ contract("Inherichain", (accounts) => {
 
   it("Updating both Deadline by outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.updateDeadline(newDeadline, newApproverDeadline, newCharityDeadline, {
-        from: outsider,
-      }),
+      inherichain.updateDeadline(
+        newDeadline,
+        newApproverDeadline,
+        newCharityDeadline,
+        {
+          from: outsider,
+        }
+      ),
       "Only owner can call this function."
     );
   });

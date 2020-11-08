@@ -18,7 +18,8 @@
 	<link href="css/simple-sidebar.css" rel="stylesheet">
 	<script src="interact.js"></script>
 	<style>
-		h1, h3 {
+		h1,
+		h3 {
 			margin-top: 3%;
 		}
 
@@ -96,76 +97,8 @@
 						<hr>
 						<hr>
 						<hr>
-						<h3>Current Status :</h3>
-						<div class="row">
-							<div class="col-sm-6">
-								User Balance : <div id="currentUserBalance"></div>
-							</div>
-							<div class="col-sm-6">
-								Contract Balance : <div id="currentContractBalance"></div>
-							</div>
-						</div>
+						<h3>Welcome Backup Owner!</h3>
 						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								Owner : <div id="currentOwner"></div>
-							</div>
-							<div class="col-sm-6">
-								Backup Owner : <div id="currentBackupOwner"></div>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								Heir : <div id="currentHeir"></div>
-							</div>
-							<div class="col-sm-6">
-								Charity : <div id="currentCharity"></div>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								Approver 1 : <div id="currentApproverOne"></div>
-							</div>
-							<div class="col-sm-6">
-								Approver 2 : <div id="currentApproverTwo"></div>
-							</div>
-							<div class="col-sm-6">
-								Approver 3 : <div id="currentApproverThree"></div>
-							</div>
-							<div class="col-sm-6">
-								Approver Count : <div id="currentApproverCount"></div>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-4">
-								Deadline (in Seconds) : <div id="currentDeadline"></div>
-							</div>
-							<div class="col-sm-4">
-								Approver Deadline (in Seconds) : <div id="currentApproverDeadline"></div>
-							</div>
-							<div class="col-sm-4">
-								Charity Deadline (in Seconds) : <div id="currentCharityDeadline"></div>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-4">
-								Contract Status : <div id="currentContractStatus"></div>
-							</div>
-							<div class="col-sm-4">
-								Claim Time (in Seconds) : <div id="currentClaimTime"></div>
-							</div>
-							<div class="col-sm-4">
-								Vote Count : <div id="currentVoteCount"></div>
-							</div>
-						</div>
-						<hr>
-						<hr>
-						<hr>
-						<h3>Welcome User!</h3>
 						<div class="row">
 							<div class="col-sm-12">
 								<h5>Deposit</h5>
@@ -180,10 +113,24 @@
 							</div>
 						</div>
 						<hr>
+						<div class="row">
+							<div class="col-sm-12">
+								<h5>Update Owner</h5>
+								<form id="backupOwnerUpdateOwner">
+									<div class="form-group">
+										<label for="updateOwner">Enter New Owner Address :</label>
+										<input type="text" id="updateOwner" class="form-control">
+									</div>
+									<button type="submit" class="btn btn-secondary">Update</button>
+									<div id="backupOwnerUpdateOwnerStatus"></div>
+								</form>
+							</div>
+						</div>
+						<hr>
 						<hr>
 						<hr>
 					</div>
-				</div>		
+				</div>
 			</div>
 		</div>
 		<!-- /#page-content-wrapper -->
