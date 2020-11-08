@@ -53,15 +53,17 @@ const initApp = () => {
         const owner = e.target.elements[0].value;
         const backupOwner = e.target.elements[1].value;
         const heir = e.target.elements[2].value;
-        const approverOne = e.target.elements[3].value;
-        const approverTwo = e.target.elements[4].value;
-        const approverThree = e.target.elements[5].value;
-        const deadline = Number(e.target.elements[6].value);
-        const approverDeadline = Number(e.target.elements[7].value);
+        const charity = e.target.elements[3].value;
+        const approverOne = e.target.elements[4].value;
+        const approverTwo = e.target.elements[5].value;
+        const approverThree = e.target.elements[6].value;
+        const deadline = Number(e.target.elements[7].value);
+        const approverDeadline = Number(e.target.elements[8].value);
+        const charityDeadline = Number(e.target.elements[9].value);
         inherichain = await new web3.eth.Contract(Inherichain.abi);
         await inherichain.deploy({
                 data: Inherichain.bytecode,
-                arguments: [owner, backupOwner, heir, [approverOne, approverTwo, approverThree], deadline, approverDeadline]
+                arguments: [owner, backupOwner, heir, charity, [approverOne, approverTwo, approverThree], deadline, approverDeadline, charityDeadline]
             })
             .send({
                 from: accounts[0]

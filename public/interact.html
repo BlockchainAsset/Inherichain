@@ -62,10 +62,10 @@
 				<h3>Current Status :</h3>
 				<div class="row">
 					<div class="col-sm-6">
-						User Balance : <div id="currentUserBalance">0</div>ETH
+						User Balance : <div id="currentUserBalance"></div>
 					</div>
 					<div class="col-sm-6">
-						Contract Balance : <div id="currentContractBalance">0</div>ETH
+						Contract Balance : <div id="currentContractBalance"></div>
 					</div>
 				</div>
 				<hr>
@@ -81,6 +81,9 @@
 				<div class="row">
 					<div class="col-sm-6">
 						Heir : <div id="currentHeir"></div>
+					</div>
+					<div class="col-sm-6">
+						Charity : <div id="currentCharity"></div>
 					</div>
 				</div>
 				<hr>
@@ -100,28 +103,25 @@
 				</div>
 				<hr>
 				<div class="row">
-					<div class="col-sm-6">
+					<div class="col-sm-4">
 						Deadline (in Seconds) : <div id="currentDeadline"></div>
 					</div>
-					<div class="col-sm-6">
+					<div class="col-sm-4">
 						Approver Deadline (in Seconds) : <div id="currentApproverDeadline"></div>
 					</div>
-				</div>
-				<hr>
-				<div class="row">
-					<div class="col-sm-6">
-						Claim Started : <div id="currentClaimStartedStatus"></div>
-					</div>
-					<div class="col-sm-6">
-						Claim Status : <div id="currentClaimStatus"></div>
+					<div class="col-sm-4">
+						Charity Deadline (in Seconds) : <div id="currentCharityDeadline"></div>
 					</div>
 				</div>
 				<hr>
 				<div class="row">
-					<div class="col-sm-6">
+					<div class="col-sm-4">
+						Contract Status : <div id="currentContractStatus"></div>
+					</div>
+					<div class="col-sm-4">
 						Claim Time (in Seconds) : <div id="currentClaimTime"></div>
 					</div>
-					<div class="col-sm-6">
+					<div class="col-sm-4">
 						Vote Count : <div id="currentVoteCount"></div>
 					</div>
 				</div>
@@ -170,6 +170,17 @@
 							<div id="ownerUpdateHeirStatus"></div>
 						</form>
 					</div>
+					<div class="col-sm-6">
+						<h5>Update Charity</h5>
+						<form id="ownerUpdateCharity">
+							<div class="form-group">
+								<label for="updateCharity">Enter New Charity Address :</label>
+								<input type="text" id="updateCharity" class="form-control">
+							</div>
+							<button type="submit" class="btn btn-secondary">Update</button>
+							<div id="ownerUpdateCharityStatus"></div>
+						</form>
+					</div>
 				</div>
 				<hr>
 				<div class="row">
@@ -203,9 +214,11 @@
 							<h5>Update Deadline & Approver Deadline</h5>
 							<div class="form-group">
 								<label for="updateDeadline">Enter New Deadline Duration (in seconds) :</label>
-								<input type="text" id="updateDeadline" class="form-control" placeholder="Leave Blank to only update Approver Deadline">
+								<input type="text" id="updateDeadline" class="form-control" placeholder="Leave Blank to only update other Deadlines">
 								<label for="updateApproverDeadline">Enter New Approver Deadline Duration (in seconds) :</label>
-								<input type="text" id="updateApproverDeadline" class="form-control" placeholder="Leave Blank to only update Deadline">
+								<input type="text" id="updateApproverDeadline" class="form-control" placeholder="Leave Blank to only update other Deadlines">
+								<label for="updateCharityDeadline">Enter New Charity Deadline Duration (in seconds) :</label>
+								<input type="text" id="updateCharityDeadline" class="form-control" placeholder="Leave Blank to only update other Deadlines">
 							</div>
 							<button type="submit" class="btn btn-secondary">Update</button>
 							<div id="ownerUpdateDeadlineStatus"></div>
@@ -412,7 +425,7 @@
 				<hr>
 				<h3>Welcome Approver!</h3>
 				<div class="row">
-					<div class="col-sm-12">
+					<div class="col-sm-6">
 						<h5>Approve or Reject Heir</h5>
 						<form id="approverAcceptance">
 							<div class="form-group">
@@ -421,6 +434,16 @@
 							</div>
 							<button type="submit" class="btn btn-secondary">Vote</button>
 							<div id="approverAcceptanceStatus"></div>
+						</form>
+					</div>
+					<div class="col-sm-6">
+						<h5>Initiate Charity?</h5>
+						<form id="initiateCharity">
+							<div class="form-group">
+								<label for="acceptHeir">Click to initiate the Charity.</label>
+							</div>
+							<button type="submit" class="btn btn-secondary">Initiate</button>
+							<div id="initiateCharityStatus"></div>
 						</form>
 					</div>
 				</div>
