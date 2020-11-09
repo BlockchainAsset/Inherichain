@@ -16,7 +16,7 @@
 
 	<!-- Custom styles for this template -->
 	<link href="css/simple-sidebar.css" rel="stylesheet">
-	<script src="interact.js"></script>
+	<script src="charity.js"></script>
 	<style>
 		h1,
 		h3 {
@@ -65,20 +65,20 @@
 
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-						<li class="nav-item active">
+						<li class="nav-item">
 							<a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="deploy.html">Deploy</a>
 						</li>
-						<li class="nav-item">
+						<li class="nav-item active">
 							<a class="nav-link" href="interact.html">Interact</a>
 						</li>
 					</ul>
 				</div>
 			</nav>
 
-			<div class="container-fluid">
+			<div class="container-fluid" id="charityHTML">
 				<div class="row">
 					<div class="col-sm-12">
 						<h1>Interact with your Wallet Contract</h1>
@@ -94,85 +94,6 @@
 								</form>
 							</div>
 						</div>
-						<hr>
-						<hr>
-						<hr>
-						<h3>Welcome Charity!</h3>
-						<hr>
-						<div class="row">
-							<div class="col-sm-12">
-								<h5>Deposit</h5>
-								<form id="userDepositETH">
-									<div class="form-group">
-										<label for="amountUser">Enter ETH Amount :</label>
-										<input type="number" id="amountUser" class="form-control" step="any">
-									</div>
-									<button type="submit" class="btn btn-success">Deposit</button>
-									<div id="userDepositStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-12">
-								<h5>Access Ownership</h5>
-								<form id="accessWalletCharity">
-									<div class="form-group">
-										<div class="row">
-											<div class="col-sm-6">
-												<label for="setBackupOwner">Backup Owner :</label>
-												<input id="setBackupOwner" type="text" class="form-control"
-													placeholder="Leave blank if no backup owner.">
-											</div>
-											<div class="col-sm-6">
-												<label for="setHeir">Heir :</label>
-												<input id="setHeir" type="text" class="form-control"
-													placeholder="Enter heir address." required>
-											</div>
-										</div>
-										<br>
-										<div class="row">
-											<div class="col-sm-4">
-												<label for="setApproverOne">Approver 1 :</label>
-												<input id="setApproverOne" type="text" class="form-control"
-													placeholder="Enter Approver One Address.">
-											</div>
-											<div class="col-sm-4">
-												<label for="setApproverTwo">Approver 2 :</label>
-												<input id="setApproverTwo" type="text" class="form-control"
-													placeholder="Enter Approver Two Address.">
-											</div>
-											<div class="col-sm-4">
-												<label for="setApproverThree">Approver 3 :</label>
-												<input id="setApproverThree" type="text" class="form-control"
-													placeholder="Enter Approver Three Address.">
-											</div>
-										</div>
-										<br>
-										<div class="row">
-											<div class="col-sm-4">
-												<label for="setDeadline">Deadline :</label>
-												<input id="setDeadline" type="number" class="form-control"
-													placeholder="Enter deadline duration." step="any">
-											</div>
-											<div class="col-sm-4">
-												<label for="setApproverDeadline">Approver Deadline :</label>
-												<input id="setApproverDeadline" type="number" class="form-control"
-													placeholder="Enter approver deadline duration." step="any">
-											</div>
-											<div class="col-sm-4">
-												<label for="setCharityDeadline">Charity Deadline :</label>
-												<input id="setCharityDeadline" type="number" class="form-control"
-													placeholder="Enter charity deadline duration." step="any">
-											</div>
-										</div>
-									</div>
-									<button type="submit" class="btn btn-primary">Access</button>
-									<div id="accessWalletCharityStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
 					</div>
 				</div>
 			</div>

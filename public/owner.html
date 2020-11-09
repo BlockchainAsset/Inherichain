@@ -16,7 +16,7 @@
 
 	<!-- Custom styles for this template -->
 	<link href="css/simple-sidebar.css" rel="stylesheet">
-	<script src="interact.js"></script>
+	<script src="owner.js"></script>
 	<style>
 		h1,
 		h3 {
@@ -65,20 +65,20 @@
 
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-						<li class="nav-item active">
+						<li class="nav-item">
 							<a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="deploy.html">Deploy</a>
 						</li>
-						<li class="nav-item">
+						<li class="nav-item active">
 							<a class="nav-link" href="interact.html">Interact</a>
 						</li>
 					</ul>
 				</div>
 			</nav>
 
-			<div class="container-fluid">
+			<div class="container-fluid" id="ownerHTML">
 				<div class="row">
 					<div class="col-sm-12">
 						<h1>Interact with your Wallet Contract</h1>
@@ -94,177 +94,6 @@
 								</form>
 							</div>
 						</div>
-						<hr>
-						<hr>
-						<hr>
-						<h3>Welcome Owner!</h3>
-						<hr>
-						<div class="row">
-							<div class="col-sm-12">
-								<h5>Deposit</h5>
-								<form id="userDepositETH">
-									<div class="form-group">
-										<label for="amountUser">Enter ETH Amount :</label>
-										<input type="number" id="amountUser" class="form-control" step="any">
-									</div>
-									<button type="submit" class="btn btn-success">Deposit</button>
-									<div id="userDepositStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								<h5>Update Backup Owner</h5>
-								<form id="ownerUpdateBackupOwner">
-									<div class="form-group">
-										<label for="updateBackupOwner">Enter New Backup Owner Address :</label>
-										<input type="text" id="updateBackupOwner" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-secondary">Update</button>
-									<div id="ownerUpdateBackupOwnerStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-6">
-								<h5>Update Heir</h5>
-								<form id="ownerUpdateHeir">
-									<div class="form-group">
-										<label for="updateHeir">Enter New Heir Address :</label>
-										<input type="text" id="updateHeir" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-secondary">Update</button>
-									<div id="ownerUpdateHeirStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-6">
-								<h5>Update Charity</h5>
-								<form id="ownerUpdateCharity">
-									<div class="form-group">
-										<label for="updateCharity">Enter New Charity Address :</label>
-										<input type="text" id="updateCharity" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-secondary">Update</button>
-									<div id="ownerUpdateCharityStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								<h5>Add New Approver</h5>
-								<form id="ownerAddApprover">
-									<div class="form-group">
-										<label for="addApprover">Enter New Approver Address :</label>
-										<input type="text" id="addApprover" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-primary">Add</button>
-									<div id="ownerAddApproverStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-6">
-								<h5>Delete Approver</h5>
-								<form id="ownerDeleteApprover">
-									<div class="form-group">
-										<label for="deleteApprover">Enter Approver Address to Delete :</label>
-										<input type="text" id="deleteApprover" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-danger">Delete</button>
-									<div id="ownerDeleteApproverStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-12">
-								<form id="ownerUpdateDeadline">
-									<h5>Update Deadline & Approver Deadline</h5>
-									<div class="form-group">
-										<label for="updateDeadline">Enter New Deadline Duration (in seconds) :</label>
-										<input type="text" id="updateDeadline" class="form-control"
-											placeholder="Leave Blank to only update other Deadlines">
-										<label for="updateApproverDeadline">Enter New Approver Deadline Duration (in
-											seconds) :</label>
-										<input type="text" id="updateApproverDeadline" class="form-control"
-											placeholder="Leave Blank to only update other Deadlines">
-										<label for="updateCharityDeadline">Enter New Charity Deadline Duration (in
-											seconds) :</label>
-										<input type="text" id="updateCharityDeadline" class="form-control"
-											placeholder="Leave Blank to only update other Deadlines">
-									</div>
-									<button type="submit" class="btn btn-secondary">Update</button>
-									<div id="ownerUpdateDeadlineStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-5">
-								<h5>Transfer ETH</h5>
-								<form id="ownerTransferSomeETH">
-									<div class="form-group">
-										<label for="transferSomeETHAmount">Enter ETH to transfer :</label>
-										<input type="number" id="transferSomeETHAmount" class="form-control" step="any">
-										<label for="transferSomeETHAddress">Enter the receiver address :</label>
-										<input type="text" id="transferSomeETHAddress" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-success">Update</button>
-									<div id="ownerTransferSomeETHStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-4">
-								<h5>Withdraw ETH</h5>
-								<form id="ownerWithdrawSomeETH">
-									<div class="form-group">
-										<label for="withdrawSomeETH">Enter ETH to withdraw :</label>
-										<input type="number" id="withdrawSomeETH" class="form-control" step="any">
-									</div>
-									<button type="submit" class="btn btn-success">Withdraw</button>
-									<div id="ownerWithdrawSomeETHStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-3">
-								<h5>Withdraw All ETH</h5>
-								<form id="ownerWithdrawAllETH">
-									<div class="form-group">
-										<label for="withdrawAllETH">Click to withdraw All ETH.</label>
-									</div>
-									<button type="submit" class="btn btn-success">Withdraw</button>
-									<div id="ownerWithdrawAllETHStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								<form id="ownerInteract">
-									<h5>Interact with other contract (Fallback function)</h5>
-									<div class="form-group">
-										<label for="addMsgValue">Enter Value to Sent (in ETH) :</label>
-										<input type="number" id="addMsgValue" class="form-control" step="any">
-										<label for="addMsgData">Enter Message Data :</label>
-										<input type="text" id="addMsgData" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-secondary">Interact</button>
-									<div id="ownerInteractStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-6">
-								<form id="ownerDeployContract">
-									<h5>Deploy Contract</h5>
-									<div class="form-group">
-										<label for="addContractValue">Enter Value to Sent (in ETH) :</label>
-										<input type="number" id="addContractValue" class="form-control" step="any">
-										<label for="addContractBytecode">Enter Contract Bytecode :</label>
-										<input type="text" id="addContractBytecode" class="form-control">
-									</div>
-									<button type="submit" class="btn btn-primary">Create</button>
-									<div id="ownerDeployContractStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<hr>
-						<hr>
 					</div>
 				</div>
 			</div>

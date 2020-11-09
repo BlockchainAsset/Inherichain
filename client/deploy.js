@@ -43,16 +43,37 @@ const initApp = () => {
   createWallet.addEventListener("submit", async (e) => {
     createWalletStatus.innerHTML = "Transaction Pending...";
     e.preventDefault();
-    const owner = e.target.elements[0].value;
-    const backupOwner = e.target.elements[1].value;
-    const heir = e.target.elements[2].value;
-    const charity = e.target.elements[3].value;
-    const approverOne = e.target.elements[4].value;
-    const approverTwo = e.target.elements[5].value;
-    const approverThree = e.target.elements[6].value;
-    const deadline = Number(e.target.elements[7].value);
-    const approverDeadline = Number(e.target.elements[8].value);
-    const charityDeadline = Number(e.target.elements[9].value);
+    let owner = e.target.elements[0].value;
+    let backupOwner = e.target.elements[1].value;
+    let heir = e.target.elements[2].value;
+    let charity = e.target.elements[3].value;
+    let approverOne = e.target.elements[4].value;
+    let approverTwo = e.target.elements[5].value;
+    let approverThree = e.target.elements[6].value;
+    let deadline = Number(e.target.elements[7].value);
+    let approverDeadline = Number(e.target.elements[8].value);
+    let charityDeadline = Number(e.target.elements[9].value);
+
+    let approvers = [];
+    // Check if blank or address.
+    if (owner == "") {
+      owner = accounts[0];
+    }
+    if (backupOwner == "") {
+      backupOwner = constants.ZERO_ADDRESS;
+    }
+    if (charity == "") {
+      charity = constants.ZERO_ADDRESS;
+    }
+    if (approverOne != "") {
+      approvers.push(approverOne);
+    }
+    if (approverTwo != "") {
+      approvers.push(approverTwo);
+    }
+    if (approverThree != "") {
+      approvers.push(approverThree);
+    }
     inherichain = await new web3.eth.Contract(Inherichain.abi);
     await inherichain
       .deploy({
@@ -62,7 +83,7 @@ const initApp = () => {
           backupOwner,
           heir,
           charity,
-          [approverOne, approverTwo, approverThree],
+          approvers,
           deadline,
           approverDeadline,
           charityDeadline,

@@ -11,6 +11,30 @@ let status = [
   "Initiated Charity",
 ];
 
+function convertSectoDay(n) {
+  let day = Number(n / (24 * 3600));
+
+  n = n % (24 * 3600);
+  let hour = Number(n / 3600);
+
+  n %= 3600;
+  let minutes = Number(n / 60);
+
+  n %= 60;
+  let seconds = n;
+
+  return (
+    day +
+    " Days, " +
+    hour +
+    " Hours, " +
+    minutes +
+    " Minutes, " +
+    seconds +
+    " Seconds"
+  );
+}
+
 const initWeb3 = () => {
   return new Promise((resolve, reject) => {
     // New Metamask
@@ -47,11 +71,24 @@ const initAccount = () => {
 
 const initWalletAddress = () => {
   const setAddress = document.getElementById("setAddress");
+  const walletAddress = document.getElementById("walletAddress");
+  walletAddress.value = localStorage.getItem("inherichainWalletAddress");
   setAddress.addEventListener("submit", (e) => {
     e.preventDefault();
     const address = e.target.elements[0].value;
     inherichain = initContract(address);
-    getData();
+    inherichain.methods
+      .heir()
+      .call({from: accounts[0]})
+      .then((values) => {
+        // Storing the data in localstorage (cache)
+        localStorage.setItem("inherichainWalletAddress", address);
+        getData();
+      })
+      .catch((error) => {
+        window.alert("Please check if it is an Inherichain Wallet.");
+        console.log(error);
+      });
   });
 };
 
@@ -64,9 +101,7 @@ const getData = () => {
   const currentBackupOwner = document.getElementById("currentBackupOwner");
   const currentHeir = document.getElementById("currentHeir");
   const currentCharity = document.getElementById("currentCharity");
-  const approverOne = document.getElementById("currentApproverOne");
-  const approverTwo = document.getElementById("currentApproverTwo");
-  const approverThree = document.getElementById("currentApproverThree");
+  const approvers = document.getElementById("currentApprovers");
   const approverCount = document.getElementById("currentApproverCount");
   const deadline = document.getElementById("currentDeadline");
   const approverDeadline = document.getElementById("currentApproverDeadline");
@@ -74,6 +109,8 @@ const getData = () => {
   const contractStatus = document.getElementById("currentContractStatus");
   const claimTime = document.getElementById("currentClaimTime");
   const voteCount = document.getElementById("currentVoteCount");
+
+  let approversLength = 0;
 
   web3.eth
     .getBalance(accounts[0])
@@ -143,43 +180,30 @@ const getData = () => {
     });
 
   inherichain.methods
-    .approvers(0)
-    .call({from: accounts[0]})
-    .then((values) => {
-      approverOne.innerHTML = values;
-    })
-    .catch((error) => {
-      approverOne.innerHTML = "There was an error while reading the data.";
-      console.log(error);
-    });
-
-  inherichain.methods
-    .approvers(1)
-    .call({from: accounts[0]})
-    .then((values) => {
-      approverTwo.innerHTML = values;
-    })
-    .catch((error) => {
-      approverTwo.innerHTML = "There was an error while reading the data.";
-      console.log(error);
-    });
-
-  inherichain.methods
-    .approvers(2)
-    .call({from: accounts[0]})
-    .then((values) => {
-      approverThree.innerHTML = values;
-    })
-    .catch((error) => {
-      approverThree.innerHTML = "There was an error while reading the data.";
-      console.log(error);
-    });
-
-  inherichain.methods
     .approversLength()
     .call({from: accounts[0]})
     .then((values) => {
-      approverCount.innerHTML = values;
+      approversLength = values;
+      approvers.innerHTML =
+        '<div class="col-sm-6">Approver Count : ' + approversLength + "</div>";
+      for (let index = 0; index < approversLength; index++) {
+        inherichain.methods
+          .approvers(index)
+          .call({from: accounts[0]})
+          .then((values) => {
+            let temp = index + 1;
+            approvers.innerHTML +=
+              '<div class="col-sm-6">Approver ' +
+              temp +
+              " : " +
+              values +
+              "</div>";
+          })
+          .catch((error) => {
+            approvers.innerHTML += "There was an error while reading the data.";
+            console.log(error);
+          });
+      }
     })
     .catch((error) => {
       approverCount.innerHTML = "There was an error while reading the data.";
@@ -190,7 +214,7 @@ const getData = () => {
     .heirDeadline()
     .call({from: accounts[0]})
     .then((values) => {
-      deadline.innerHTML = values;
+      deadline.innerHTML = convertSectoDay(values);
     })
     .catch((error) => {
       deadline.innerHTML = "There was an error while reading the data.";
@@ -201,7 +225,7 @@ const getData = () => {
     .heirApprovedDeadline()
     .call({from: accounts[0]})
     .then((values) => {
-      approverDeadline.innerHTML = values;
+      approverDeadline.innerHTML = convertSectoDay(values);
     })
     .catch((error) => {
       approverDeadline.innerHTML = "There was an error while reading the data.";
@@ -212,7 +236,7 @@ const getData = () => {
     .charityDeadline()
     .call({from: accounts[0]})
     .then((values) => {
-      charityDeadline.innerHTML = values;
+      charityDeadline.innerHTML = convertSectoDay(values);
     })
     .catch((error) => {
       charityDeadline.innerHTML = "There was an error while reading the data.";
@@ -253,155 +277,10 @@ const getData = () => {
     });
 };
 
-const clearStatus = () => {
-  const userDepositStatus = document.getElementById("userDepositStatus");
-  const ownerUpdateBackupOwnerStatus = document.getElementById(
-    "ownerUpdateBackupOwnerStatus"
-  );
-  const ownerUpdateHeirStatus = document.getElementById(
-    "ownerUpdateHeirStatus"
-  );
-  const ownerUpdateCharityStatus = document.getElementById(
-    "ownerUpdateCharityStatus"
-  );
-  const ownerAddApproverStatus = document.getElementById(
-    "ownerAddApproverStatus"
-  );
-  const ownerDeleteApproverStatus = document.getElementById(
-    "ownerDeleteApproverStatus"
-  );
-  const ownerUpdateDeadlineStatus = document.getElementById(
-    "ownerUpdateDeadlineStatus"
-  );
-  const ownerTransferSomeETHStatus = document.getElementById(
-    "ownerTransferSomeETHStatus"
-  );
-  const ownerWithdrawSomeETHStatus = document.getElementById(
-    "ownerWithdrawSomeETHStatus"
-  );
-  const ownerWithdrawAllETHStatus = document.getElementById(
-    "ownerWithdrawAllETHStatus"
-  );
-  const ownerInteractStatus = document.getElementById("ownerInteractStatus");
-  const ownerDeployContractStatus = document.getElementById(
-    "ownerDeployContractStatus"
-  );
-  const backupOwnerUpdateOwnerStatus = document.getElementById(
-    "backupOwnerUpdateOwnerStatus"
-  );
-  const heirClaimOwnershipStatus = document.getElementById(
-    "heirClaimOwnershipStatus"
-  );
-  const accessWalletApproverStatus = document.getElementById(
-    "accessWalletApproverStatus"
-  );
-  const accessWalletDeadlineStatus = document.getElementById(
-    "accessWalletDeadlineStatus"
-  );
-  const approverAcceptanceStatus = document.getElementById(
-    "approverAcceptanceStatus"
-  );
-  const initiateCharityStatus = document.getElementById(
-    "initiateCharityStatus"
-  );
-
-  userDepositStatus.innerHTML = "";
-  ownerUpdateBackupOwnerStatus.innerHTML = "";
-  ownerUpdateHeirStatus.innerHTML = "";
-  ownerUpdateCharityStatus.innerHTML = "";
-  ownerAddApproverStatus.innerHTML = "";
-  ownerDeleteApproverStatus.innerHTML = "";
-  ownerUpdateDeadlineStatus.innerHTML = "";
-  ownerTransferSomeETHStatus.innerHTML = "";
-  ownerWithdrawSomeETHStatus.innerHTML = "";
-  ownerWithdrawAllETHStatus.innerHTML = "";
-  ownerInteractStatus.innerHTML = "";
-  ownerDeployContractStatus.innerHTML = "";
-  backupOwnerUpdateOwnerStatus.innerHTML = "";
-  heirClaimOwnershipStatus.innerHTML = "";
-  accessWalletApproverStatus.innerHTML = "";
-  accessWalletDeadlineStatus.innerHTML = "";
-  approverAcceptanceStatus.innerHTML = "";
-  initiateCharityStatus.innerHTML = "";
-};
-
 const initApp = () => {
   const userDepositETH = document.getElementById("userDepositETH");
-  const ownerUpdateBackupOwner = document.getElementById(
-    "ownerUpdateBackupOwner"
-  );
-  const ownerUpdateHeir = document.getElementById("ownerUpdateHeir");
-  const ownerUpdateCharity = document.getElementById("ownerUpdateCharity");
-  const ownerAddApprover = document.getElementById("ownerAddApprover");
-  const ownerDeleteApprover = document.getElementById("ownerDeleteApprover");
-  const ownerUpdateDeadline = document.getElementById("ownerUpdateDeadline");
-  const ownerTransferSomeETH = document.getElementById("ownerTransferSomeETH");
-  const ownerWithdrawSomeETH = document.getElementById("ownerWithdrawSomeETH");
-  const ownerWithdrawAllETH = document.getElementById("ownerWithdrawAllETH");
-  const ownerInteract = document.getElementById("ownerInteract");
-  const ownerDeployContract = document.getElementById("ownerDeployContract");
-  const backupOwnerUpdateOwner = document.getElementById(
-    "backupOwnerUpdateOwner"
-  );
-  const heirClaimOwnership = document.getElementById("heirClaimOwnership");
-  const accessWalletApprover = document.getElementById("accessWalletApprover");
-  const accessWalletDeadline = document.getElementById("accessWalletDeadline");
-  const approverAcceptance = document.getElementById("approverAcceptance");
-  const initiateCharity = document.getElementById("initiateCharity");
-
-  const userDepositStatus = document.getElementById("userDepositStatus");
-  const ownerUpdateBackupOwnerStatus = document.getElementById(
-    "ownerUpdateBackupOwnerStatus"
-  );
-  const ownerUpdateHeirStatus = document.getElementById(
-    "ownerUpdateHeirStatus"
-  );
-  const ownerUpdateCharityStatus = document.getElementById(
-    "ownerUpdateCharityStatus"
-  );
-  const ownerAddApproverStatus = document.getElementById(
-    "ownerAddApproverStatus"
-  );
-  const ownerDeleteApproverStatus = document.getElementById(
-    "ownerDeleteApproverStatus"
-  );
-  const ownerUpdateDeadlineStatus = document.getElementById(
-    "ownerUpdateDeadlineStatus"
-  );
-  const ownerTransferSomeETHStatus = document.getElementById(
-    "ownerTransferSomeETHStatus"
-  );
-  const ownerWithdrawSomeETHStatus = document.getElementById(
-    "ownerWithdrawSomeETHStatus"
-  );
-  const ownerWithdrawAllETHStatus = document.getElementById(
-    "ownerWithdrawAllETHStatus"
-  );
-  const ownerInteractStatus = document.getElementById("ownerInteractStatus");
-  const ownerDeployContractStatus = document.getElementById(
-    "ownerDeployContractStatus"
-  );
-  const backupOwnerUpdateOwnerStatus = document.getElementById(
-    "backupOwnerUpdateOwnerStatus"
-  );
-  const heirClaimOwnershipStatus = document.getElementById(
-    "heirClaimOwnershipStatus"
-  );
-  const accessWalletApproverStatus = document.getElementById(
-    "accessWalletApproverStatus"
-  );
-  const accessWalletDeadlineStatus = document.getElementById(
-    "accessWalletDeadlineStatus"
-  );
-  const approverAcceptanceStatus = document.getElementById(
-    "approverAcceptanceStatus"
-  );
-  const initiateCharityStatus = document.getElementById(
-    "initiateCharityStatus"
-  );
 
   userDepositETH.addEventListener("submit", async (e) => {
-    clearStatus();
     userDepositStatus.innerHTML = "Transaction Pending...";
     e.preventDefault();
     const amount = e.target.elements[0].value;
@@ -420,393 +299,36 @@ const initApp = () => {
         console.log(error);
       });
   });
-
-  ownerUpdateBackupOwner.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerUpdateBackupOwnerStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const address = e.target.elements[0].value;
-    inherichain.methods
-      .updateBackupOwner(address)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerUpdateBackupOwnerStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerUpdateBackupOwnerStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerUpdateHeir.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerUpdateHeirStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const address = e.target.elements[0].value;
-    inherichain.methods
-      .updateHeir(address)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerUpdateHeirStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerUpdateHeirStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerUpdateCharity.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerUpdateCharityStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const address = e.target.elements[0].value;
-    inherichain.methods
-      .updateCharity(address)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerUpdateCharityStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerUpdateCharityStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerAddApprover.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerAddApproverStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const address = e.target.elements[0].value;
-    inherichain.methods
-      .addApprover(address)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerAddApproverStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerAddApproverStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerDeleteApprover.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerDeleteApproverStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const address = e.target.elements[0].value;
-    inherichain.methods
-      .deleteApprover(address)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerDeleteApproverStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerDeleteApproverStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerUpdateDeadline.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerUpdateDeadlineStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const deadline = e.target.elements[0].value;
-    const approverDeadline = e.target.elements[1].value;
-    const charityDeadline = e.target.elements[2].value;
-    inherichain.methods
-      .updateDeadline(deadline, approverDeadline, charityDeadline)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerUpdateDeadlineStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerUpdateDeadlineStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerTransferSomeETH.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerTransferSomeETHStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const amount = web3.utils.toWei(e.target.elements[0].value);
-    const address = e.target.elements[1].value;
-    inherichain.methods
-      .transferETH(address, amount)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerTransferSomeETHStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerTransferSomeETHStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerWithdrawSomeETH.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerWithdrawSomeETHStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const amount = web3.utils.toWei(e.target.elements[0].value);
-    inherichain.methods
-      .withdrawSomeETH(amount)
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerWithdrawSomeETHStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerWithdrawSomeETHStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerWithdrawAllETH.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerWithdrawAllETHStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    inherichain.methods
-      .withdrawAllETH()
-      .send({from: accounts[0]})
-      .then(() => {
-        ownerWithdrawAllETHStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerWithdrawAllETHStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerInteract.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerInteractStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const amount = e.target.elements[0].value;
-    const msgData = e.target.elements[1].value;
-    await web3.eth
-      .sendTransaction({
-        from: accounts[0],
-        to: inherichain.options.address,
-        value: web3.utils.toWei(amount),
-        data: msgData,
-      })
-      .then(() => {
-        ownerInteractStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerInteractStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  ownerDeployContract.addEventListener("submit", async (e) => {
-    clearStatus();
-    ownerDeployContractStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const amount = e.target.elements[0].value;
-    const bytecode = e.target.elements[1].value;
-    inherichain.methods
-      .deployContract(amount, bytecode)
-      .send({from: accounts[0], value: web3.utils.toWei(amount)})
-      .then(() => {
-        ownerDeployContractStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        ownerDeployContractStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  backupOwnerUpdateOwner.addEventListener("submit", async (e) => {
-    clearStatus();
-    backupOwnerUpdateOwnerStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const address = e.target.elements[0].value;
-    inherichain.methods
-      .updateOwner(address)
-      .send({from: accounts[0]})
-      .then(() => {
-        backupOwnerUpdateOwnerStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        backupOwnerUpdateOwnerStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  heirClaimOwnership.addEventListener("submit", async (e) => {
-    clearStatus();
-    heirClaimOwnershipStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    inherichain.methods
-      .claimOwnership()
-      .send({from: accounts[0]})
-      .then(() => {
-        heirClaimOwnershipStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        heirClaimOwnershipStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  accessWalletApprover.addEventListener("submit", async (e) => {
-    clearStatus();
-    accessWalletApproverStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const backupOwner = e.target.elements[0].value;
-    const heir = e.target.elements[1].value;
-    const approverOne = e.target.elements[2].value;
-    const approverTwo = e.target.elements[3].value;
-    const approverThree = e.target.elements[4].value;
-    const deadline = Number(e.target.elements[5].value);
-    const approverDeadline = Number(e.target.elements[6].value);
-    const charityDeadline = Number(e.target.elements[7].value);
-    inherichain.methods
-      .accessOwnershipFromApprover(
-        backupOwner,
-        heir,
-        [approverOne, approverTwo, approverThree],
-        deadline,
-        approverDeadline,
-        charityDeadline
-      )
-      .send({from: accounts[0]})
-      .then(() => {
-        accessWalletApproverStatus.innerHTML = `Success!`;
-        getData();
-      })
-      .catch((error) => {
-        accessWalletApproverStatus.innerHTML = `There was an error!`;
-        console.log(error);
-      });
-  });
-
-  accessWalletDeadline.addEventListener("submit", async (e) => {
-    clearStatus();
-    accessWalletDeadlineStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const backupOwner = e.target.elements[0].value;
-    const heir = e.target.elements[1].value;
-    const approverOne = e.target.elements[2].value;
-    const approverTwo = e.target.elements[3].value;
-    const approverThree = e.target.elements[4].value;
-    const deadline = Number(e.target.elements[5].value);
-    const approverDeadline = Number(e.target.elements[6].value);
-    const charityDeadline = Number(e.target.elements[7].value);
-    inherichain.methods
-      .accessOwnershipAfterDeadline(
-        backupOwner,
-        heir,
-        [approverOne, approverTwo, approverThree],
-        deadline,
-        approverDeadline,
-        charityDeadline
-      )
-      .send({from: accounts[0]})
-      .then(() => {
-        accessWalletDeadlineStatus.innerHTML = `Success!`;
-        getData();
-      })
-      .catch((error) => {
-        accessWalletDeadlineStatus.innerHTML = `There was an error!`;
-        console.log(error);
-      });
-  });
-
-  approverAcceptance.addEventListener("submit", async (e) => {
-    clearStatus();
-    approverAcceptanceStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const acceptance = Number(e.target.elements[0].value);
-    let value = true;
-    if (acceptance == 0) {
-      value = false;
-    }
-    inherichain.methods
-      .approveHeir(value)
-      .send({from: accounts[0]})
-      .then(() => {
-        approverAcceptanceStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        approverAcceptanceStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  initiateCharity.addEventListener("submit", async (e) => {
-    clearStatus();
-    initiateCharityStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    inherichain.methods
-      .initiateCharity()
-      .send({from: accounts[0]})
-      .then(() => {
-        initiateCharityStatus.innerHTML = "Success!";
-        getData();
-      })
-      .catch((error) => {
-        initiateCharityStatus.innerHTML = "There was an error!";
-        console.log(error);
-      });
-  });
-
-  accessWalletCharity.addEventListener("submit", async (e) => {
-    clearStatus();
-    accessWalletCharityStatus.innerHTML = "Transaction Pending...";
-    e.preventDefault();
-    const backupOwner = e.target.elements[0].value;
-    const heir = e.target.elements[1].value;
-    const approverOne = e.target.elements[2].value;
-    const approverTwo = e.target.elements[3].value;
-    const approverThree = e.target.elements[4].value;
-    const deadline = Number(e.target.elements[5].value);
-    const approverDeadline = Number(e.target.elements[6].value);
-    const charityDeadline = Number(e.target.elements[7].value);
-    inherichain.methods
-      .accessOwnershipFromCharity(
-        backupOwner,
-        heir,
-        [approverOne, approverTwo, approverThree],
-        deadline,
-        approverDeadline,
-        charityDeadline
-      )
-      .send({from: accounts[0]})
-      .then(() => {
-        accessWalletCharityStatus.innerHTML = `Success!`;
-        getData();
-      })
-      .catch((error) => {
-        accessWalletCharityStatus.innerHTML = `There was an error!`;
-        console.log(error);
-      });
-  });
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  initWeb3()
-    .then((_web3) => {
-      web3 = _web3;
-      initAccount();
-      initApp();
-      initWalletAddress();
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+// document.addEventListener("DOMContentLoaded", () => {
+//   initWeb3()
+//     .then((_web3) => {
+//       web3 = _web3;
+//       initAccount();
+//       initApp();
+//       initWalletAddress();
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+// });
+
+ethereum.on("accountsChanged", function (acc) {
+  // Time to reload your interface with accounts[0]!
+  if (acc.length === 0) {
+    // MetaMask is locked or the user has not connected any accounts
+    console.log("Please connect to MetaMask.");
+  } else {
+    initWeb3()
+      .then((_web3) => {
+        web3 = _web3;
+        initAccount();
+        initApp();
+        initWalletAddress();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 });

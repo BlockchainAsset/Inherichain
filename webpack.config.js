@@ -5,7 +5,12 @@ module.exports = {
     entry: {
       index: './client/index.js',
       deploy: './client/deploy.js',
-      interact: './client/interact.js'
+      interact: './client/interact.js',
+      owner: './client/owner.js',
+      backupOwner: './client/backupOwner.js',
+      approver: './client/approver.js',
+      heir: './client/heir.js',
+      charity: './client/charity.js'
     },
     output: {
         path: path.resolve(__dirname, 'public'),

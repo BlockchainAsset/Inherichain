@@ -16,7 +16,7 @@
 
 	<!-- Custom styles for this template -->
 	<link href="css/simple-sidebar.css" rel="stylesheet">
-	<script src="interact.js"></script>
+	<script src="approver.js"></script>
 	<style>
 		h1,
 		h3 {
@@ -65,20 +65,20 @@
 
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					<ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-						<li class="nav-item active">
+						<li class="nav-item">
 							<a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
 						</li>
 						<li class="nav-item">
 							<a class="nav-link" href="deploy.html">Deploy</a>
 						</li>
-						<li class="nav-item">
+						<li class="nav-item active">
 							<a class="nav-link" href="interact.html">Interact</a>
 						</li>
 					</ul>
 				</div>
 			</nav>
 
-			<div class="container-fluid">
+			<div class="container-fluid" id="approverHTML">
 				<div class="row">
 					<div class="col-sm-12">
 						<h1>Interact with your Wallet Contract</h1>
@@ -94,51 +94,6 @@
 								</form>
 							</div>
 						</div>
-						<hr>
-						<hr>
-						<hr>
-						<h3>Welcome Approver!</h3>
-						<hr>
-						<div class="row">
-							<div class="col-sm-12">
-								<h5>Deposit</h5>
-								<form id="userDepositETH">
-									<div class="form-group">
-										<label for="amountUser">Enter ETH Amount :</label>
-										<input type="number" id="amountUser" class="form-control" step="any">
-									</div>
-									<button type="submit" class="btn btn-success">Deposit</button>
-									<div id="userDepositStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-6">
-								<h5>Approve or Reject Heir</h5>
-								<form id="approverAcceptance">
-									<div class="form-group">
-										<label for="acceptHeir">Accept</label>
-										<input type="number" id="acceptHeir" placeholder="0 = Reject and 1 = Accept.">
-									</div>
-									<button type="submit" class="btn btn-secondary">Vote</button>
-									<div id="approverAcceptanceStatus"></div>
-								</form>
-							</div>
-							<div class="col-sm-6">
-								<h5>Initiate Charity?</h5>
-								<form id="initiateCharity">
-									<div class="form-group">
-										<label for="acceptHeir">Click to initiate the Charity.</label>
-									</div>
-									<button type="submit" class="btn btn-secondary">Initiate</button>
-									<div id="initiateCharityStatus"></div>
-								</form>
-							</div>
-						</div>
-						<hr>
-						<hr>
-						<hr>
 					</div>
 				</div>
 			</div>
