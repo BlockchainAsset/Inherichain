@@ -193,9 +193,10 @@ Only callable if claim has started and approver not already voted.
 
 ### `initiateCharity()` (public)
 
+Can be used to initiate the charity process.
 
 
-
+Called when owner and heir are no more.
 
 ### `accessOwnershipFromCharity(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 

@@ -15,16 +15,17 @@ contract Inherichain {
     // Deadline also works for owner to reclaim if the heir colluded with approvers.
     uint256 public heirDeadline = 30 days; // Wait time for the heir without approvers approval. Default is 30 days.
     uint256 public heirApprovedDeadline = 7 days; // Wait time for the heir with approvers approval. Default is 7 days.
-    uint256 public charityDeadline = 45 days;
+    uint256 public charityDeadline = 45 days; // Wait time for the charity with approver initiation. Default is 45 days.
 
     address public owner; // The owner of this contract wallet.
     address public backupOwner; // The backup owner, same as owner of this wallet, but with a different address.
     address public heir; // The heir of this contract.
-    address public charity;
-    address public charityInitiator;
+    address public charity; // The charity decided by the owner.
+    address public charityInitiator; // The approver who initiated the charity.
 
+    // Different types of Contract State.
     enum Status {Initial, HeirClaimed, ApproverApproved, InitiatedCharity}
-    Status public status;
+    Status public status; // The current status of the contract.
 
     mapping(address => bool) public approverStatus; // Whether the approver is valid or not.
     mapping(address => bool) public voted; // Whether the approver has voted or not.
@@ -674,6 +675,8 @@ contract Inherichain {
         emit heirApproval(msg.sender, _acceptance);
     }
 
+    /// @notice Can be used to initiate the charity process.
+    /// @dev Called when owner and heir are no more.
     function initiateCharity() public onlyApprover {
         require(
             status == Status.Initial,
