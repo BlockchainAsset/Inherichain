@@ -19,7 +19,7 @@ A basic description of all the functions, modifiers, and events are specified in
 **Admin** can :
 - Update the Backup Owner.
 - Update the Heir (Resets the Claim Process).
-- Update the Deadline.
+- Update the Deadlines.
 - Add new Approvers.
 - Delete old Approvers.
 - Interact with Other Contracts (ERC20 Transfers, etc.).
@@ -36,14 +36,17 @@ A basic description of all the functions, modifiers, and events are specified in
 
 **Approver** can :
 - Approve or Reject Heir.
+- Initiate Charity Process.
+
+**Charity** can :
+- Access Ownership after approver Initiation.
 
 **Every User** can :
-- Deposit ETH.
+- Deposit ETH and other assets.
 
 ## Enhancement to do:
 - Involve Kleros if heir & owner demise at the same time to choose what to do with the funds.
 - Introduce Vote weightage for approvers.
-- At the moment, the Approver's role is to fast-track the heir claim process. But we can improve and involve the approvers more to give the assets to some publicly announced charity or so on the unanimous front of all approvers. The final say on the charity by involving Kleros.
 - Mechanism to divide the contract asset into parts based on multiple heirs. Expanding on the same, giving different % for different Heir.
 
 ## How to Run the Project
