@@ -12,7 +12,8 @@
     "documentation": "solidity-docgen --solc-module ./node_modules/solc",
     "test": "truffle test --network development",
     "coverage": "truffle run coverage --file='test/*.test.js' --network coverage",
-    "start": "webpack-dev-server"
+    "start": "node server.js",
+    "heroku-postbuild": "webpack -p"
   },
   "repository": {
     "type": "git",
