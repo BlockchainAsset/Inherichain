@@ -49,7 +49,7 @@ const checkRights = () => {
   let heirHTML = document.getElementById("heirHTML");
   inherichain.methods
     .heir()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       if (values != accounts[0]) {
         window.alert("You don't have the rights of heir.");
@@ -75,7 +75,7 @@ const initWalletAddress = () => {
     inherichain = initContract(address);
     inherichain.methods
       .heir()
-      .call({from: accounts[0]})
+      .call({ from: accounts[0] })
       .then((values) => {
         // Storing the data in localstorage (cache)
         localStorage.setItem("inherichainWalletAddress", address);
@@ -125,7 +125,7 @@ const initApp = () => {
     e.preventDefault();
     inherichain.methods
       .claimOwnership()
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         heirClaimOwnershipStatus.innerHTML = "Success!";
       })
@@ -156,7 +156,7 @@ const initApp = () => {
         approverDeadline,
         charityDeadline
       )
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         accessWalletApproverStatus.innerHTML = `Success!`;
       })
@@ -187,7 +187,7 @@ const initApp = () => {
         approverDeadline,
         charityDeadline
       )
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         accessWalletDeadlineStatus.innerHTML = `Success!`;
       })

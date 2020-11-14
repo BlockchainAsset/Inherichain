@@ -43,7 +43,7 @@ const checkRights = () => {
   let ownerHTML = document.getElementById("ownerHTML");
   inherichain.methods
     .owner()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       if (values != accounts[0]) {
         window.alert("You don't have the rights of owner.");
@@ -69,7 +69,7 @@ const initWalletAddress = () => {
     inherichain = initContract(address);
     inherichain.methods
       .heir()
-      .call({from: accounts[0]})
+      .call({ from: accounts[0] })
       .then((values) => {
         // Storing the data in localstorage (cache)
         localStorage.setItem("inherichainWalletAddress", address);
@@ -182,7 +182,7 @@ const initApp = () => {
     const address = e.target.elements[0].value;
     inherichain.methods
       .updateBackupOwner(address)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerUpdateBackupOwnerStatus.innerHTML = "Success!";
       })
@@ -199,7 +199,7 @@ const initApp = () => {
     const address = e.target.elements[0].value;
     inherichain.methods
       .updateHeir(address)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerUpdateHeirStatus.innerHTML = "Success!";
       })
@@ -216,7 +216,7 @@ const initApp = () => {
     const address = e.target.elements[0].value;
     inherichain.methods
       .updateCharity(address)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerUpdateCharityStatus.innerHTML = "Success!";
       })
@@ -233,7 +233,7 @@ const initApp = () => {
     const address = e.target.elements[0].value;
     inherichain.methods
       .addApprover(address)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerAddApproverStatus.innerHTML = "Success!";
       })
@@ -250,7 +250,7 @@ const initApp = () => {
     const address = e.target.elements[0].value;
     inherichain.methods
       .deleteApprover(address)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerDeleteApproverStatus.innerHTML = "Success!";
       })
@@ -269,7 +269,7 @@ const initApp = () => {
     const charityDeadline = e.target.elements[2].value;
     inherichain.methods
       .updateDeadline(deadline, approverDeadline, charityDeadline)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerUpdateDeadlineStatus.innerHTML = "Success!";
       })
@@ -287,7 +287,7 @@ const initApp = () => {
     const address = e.target.elements[1].value;
     inherichain.methods
       .transferETH(address, amount)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerTransferSomeETHStatus.innerHTML = "Success!";
       })
@@ -304,7 +304,7 @@ const initApp = () => {
     const amount = web3.utils.toWei(e.target.elements[0].value);
     inherichain.methods
       .withdrawSomeETH(amount)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerWithdrawSomeETHStatus.innerHTML = "Success!";
       })
@@ -320,7 +320,7 @@ const initApp = () => {
     e.preventDefault();
     inherichain.methods
       .withdrawAllETH()
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         ownerWithdrawAllETHStatus.innerHTML = "Success!";
       })
@@ -360,7 +360,7 @@ const initApp = () => {
     const bytecode = e.target.elements[1].value;
     inherichain.methods
       .deployContract(amount, bytecode)
-      .send({from: accounts[0], value: web3.utils.toWei(amount)})
+      .send({ from: accounts[0], value: web3.utils.toWei(amount) })
       .then(() => {
         ownerDeployContractStatus.innerHTML = "Success!";
       })

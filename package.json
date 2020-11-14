@@ -1,6 +1,6 @@
 {
   "name": "inherichain",
-  "version": "2.4.4",
+  "version": "3.0.0",
   "description": "A wallet which has inheritance built in on the Ethereum Blockchain.",
   "main": "truffle-config.js",
   "directories": {
@@ -10,6 +10,7 @@
     "lint": "solhint 'contracts/**/*.sol'",
     "prettier": "prettier --write **/*.sol **/*.js",
     "documentation": "solidity-docgen --solc-module ./node_modules/solc",
+    "migrate": "truffle compile && truffle migrate --reset",
     "test": "truffle test --network development",
     "coverage": "truffle run coverage --file='test/*.test.js' --network coverage",
     "start": "node server.js",
@@ -32,6 +33,7 @@
   },
   "homepage": "https://github.com/remedcu/Inherichain#readme",
   "dependencies": {
+    "@kleros/erc-792": "^7.0.0",
     "@openzeppelin/test-helpers": "^0.5.7",
     "ganache-cli": "^6.12.0",
     "solc": "0.7.0",

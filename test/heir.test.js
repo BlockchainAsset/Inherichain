@@ -1,6 +1,7 @@
 const Inherichain = artifacts.require("Inherichain");
 const Demo = artifacts.require("Demo");
 const SimpleERC20 = artifacts.require("SimpleERC20");
+const SimpleCentralizedArbitrator = artifacts.require("SimpleCentralizedArbitrator");
 
 const {
   time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -20,6 +21,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
   let inherichain = null;
   let demo = null;
   let simpleERC20 = null;
+  let arbitrator = null;
   let owner,
     backupOwner,
     heir,
@@ -33,10 +35,16 @@ contract("Inherichain (Heir Functions)", (accounts) => {
     newApproverTwo,
     newApproverThree,
     outsider;
+  const arbitratorExtraData = `0x0`;
+  const metaEvidence = "";
   const sInitial = 0;
   const sHeirClaimed = 1;
-  const sApproverApproved = 2;
-  const sInitiatedCharity = 3;
+  const sClaimDisputed = 2;
+  const sDisputeResultPending =3;
+  const sApproverApproved = 4;
+  const sArbitratorApproved = 5;
+  const sArbitratorRejected = 6;
+  const sInitiatedCharity = 7;
   const deadline = time.duration.days(30).toNumber();
   const approverDeadline = time.duration.days(7).toNumber();
   const charityDeadline = time.duration.days(45).toNumber();
@@ -73,6 +81,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
     // inherichain = await Inherichain.deployed();
     demo = await Demo.deployed();
     simpleERC20 = await SimpleERC20.deployed();
+    arbitrator = await SimpleCentralizedArbitrator.deployed();
   });
 
   beforeEach("", async () => {
@@ -81,6 +90,9 @@ contract("Inherichain (Heir Functions)", (accounts) => {
       backupOwner,
       heir,
       charity,
+      arbitrator.address,
+      arbitratorExtraData,
+      metaEvidence,
       [approverOne, approverTwo, approverThree],
       0,
       0,
@@ -91,7 +103,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
   it("Claim ownership by Heir should be possible.", async () => {
     const cOldStatus = await inherichain.status();
     const cOldClaimTime = await inherichain.claimTime();
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     const cNewStatus = await inherichain.status();
     const cNewClaimTime = await inherichain.claimTime();
     assert.strictEqual(
@@ -118,21 +130,21 @@ contract("Inherichain (Heir Functions)", (accounts) => {
 
   it("Claim ownership by Outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.claimOwnership({from: outsider}),
+      inherichain.claimOwnership({ from: outsider }),
       "Only heir can call this function."
     );
   });
 
   it("Claim ownership by Heir twice should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await expectRevert(
-      inherichain.claimOwnership({from: heir}),
+      inherichain.claimOwnership({ from: heir }),
       "Claim already started."
     );
   });
 
   it("Claim ownership by Heir should emit the ownershipClaimed Event.", async () => {
-    const receipt = await inherichain.claimOwnership({from: heir});
+    const receipt = await inherichain.claimOwnership({ from: heir });
     expectEvent(receipt, "ownershipClaimed", {
       _heir: heir,
       // _claimTime: ,
@@ -140,9 +152,9 @@ contract("Inherichain (Heir Functions)", (accounts) => {
   });
 
   it("Accessing ownership with approver votes by heir should be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(true, {from: approverOne});
-    await inherichain.approveHeir(true, {from: approverTwo});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(true, { from: approverOne });
+    await inherichain.approveHeir(true, { from: approverTwo });
     await time.increase(approverDeadline + 1);
     await inherichain.accessOwnershipFromApprover(
       newBackupOwner,
@@ -151,7 +163,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
       newDeadline,
       newApproverDeadline,
       newCharityDeadline,
-      {from: heir}
+      { from: heir }
     );
     const cNewStatus = await inherichain.status();
     const cNewOwner = await inherichain.owner();
@@ -230,7 +242,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
   });
 
   it("Accessing ownership without approver votes by heir should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await expectRevert(
       inherichain.accessOwnershipFromApprover(
         newBackupOwner,
@@ -239,16 +251,16 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: heir}
+        { from: heir }
       ),
       "Majority vote required to access ownership."
     );
   });
 
   it("Accessing ownership with approver votes by outsider should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(true, {from: approverOne});
-    await inherichain.approveHeir(true, {from: approverTwo});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(true, { from: approverOne });
+    await inherichain.approveHeir(true, { from: approverTwo });
     await expectRevert(
       inherichain.accessOwnershipFromApprover(
         newBackupOwner,
@@ -257,14 +269,14 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: outsider}
+        { from: outsider }
       ),
       "Only heir can call this function."
     );
   });
 
   it("Accessing ownership without approver votes by outsider should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await expectRevert(
       inherichain.accessOwnershipFromApprover(
         newBackupOwner,
@@ -273,16 +285,16 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: outsider}
+        { from: outsider }
       ),
       "Only heir can call this function."
     );
   });
 
   it("Accessing ownership from approver votes before approver deadline by heir should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(true, {from: approverOne});
-    await inherichain.approveHeir(true, {from: approverTwo});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(true, { from: approverOne });
+    await inherichain.approveHeir(true, { from: approverTwo });
     await expectRevert(
       inherichain.accessOwnershipFromApprover(
         newBackupOwner,
@@ -291,16 +303,16 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: heir}
+        { from: heir }
       ),
       "Deadline has not passed."
     );
   });
 
   it("Accessing ownership from approver votes by heir should emit ownershipAccessed Event.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(true, {from: approverOne});
-    await inherichain.approveHeir(true, {from: approverTwo});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(true, { from: approverOne });
+    await inherichain.approveHeir(true, { from: approverTwo });
     await time.increase(approverDeadline + 1);
     const receipt = await inherichain.accessOwnershipFromApprover(
       newBackupOwner,
@@ -309,7 +321,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
       newDeadline,
       newApproverDeadline,
       newCharityDeadline,
-      {from: heir}
+      { from: heir }
     );
     expectEvent(receipt, "ownershipAccessed", {
       _newOwner: heir,
@@ -322,7 +334,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
   });
 
   it("Accessing ownership after deadline by heir should be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await time.increase(deadline + 1);
     await inherichain.accessOwnershipAfterDeadline(
       newBackupOwner,
@@ -331,7 +343,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
       newDeadline,
       newApproverDeadline,
       newCharityDeadline,
-      {from: heir}
+      { from: heir }
     );
     const cNewStatus = await inherichain.status();
     const cNewOwner = await inherichain.owner();
@@ -410,7 +422,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
   });
 
   it("Accessing ownership before deadline by heir should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await expectRevert(
       inherichain.accessOwnershipAfterDeadline(
         newBackupOwner,
@@ -419,14 +431,14 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: heir}
+        { from: heir }
       ),
       "Deadline has not passed."
     );
   });
 
   it("Accessing ownership after deadline by outsider should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await time.increase(deadline + 1);
     await expectRevert(
       inherichain.accessOwnershipAfterDeadline(
@@ -436,14 +448,14 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: outsider}
+        { from: outsider }
       ),
       "Only heir can call this function."
     );
   });
 
   it("Accessing ownership before deadline by outsider should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await time.increase(deadline + 1);
     await expectRevert(
       inherichain.accessOwnershipAfterDeadline(
@@ -453,14 +465,14 @@ contract("Inherichain (Heir Functions)", (accounts) => {
         newDeadline,
         newApproverDeadline,
         newCharityDeadline,
-        {from: outsider}
+        { from: outsider }
       ),
       "Only heir can call this function."
     );
   });
 
   it("Accessing ownership after deadline by heir should emit ownershipAccessed Event.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await time.increase(deadline + 1);
     const receipt = await inherichain.accessOwnershipAfterDeadline(
       newBackupOwner,
@@ -469,7 +481,7 @@ contract("Inherichain (Heir Functions)", (accounts) => {
       newDeadline,
       newApproverDeadline,
       newCharityDeadline,
-      {from: heir}
+      { from: heir }
     );
     expectEvent(receipt, "ownershipAccessed", {
       _newOwner: heir,
@@ -480,5 +492,4 @@ contract("Inherichain (Heir Functions)", (accounts) => {
       _heirApprovedDeadline: new BN(newApproverDeadline),
     });
   });
-
 });

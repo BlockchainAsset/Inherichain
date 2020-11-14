@@ -49,7 +49,7 @@ const checkRights = () => {
   let approverHTML = document.getElementById("approverHTML");
   inherichain.methods
     .approverStatus(accounts[0])
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       if (!values) {
         window.alert("You don't have the rights of approver.");
@@ -76,7 +76,7 @@ const initWalletAddress = () => {
     inherichain = initContract(address);
     inherichain.methods
       .heir()
-      .call({from: accounts[0]})
+      .call({ from: accounts[0] })
       .then((values) => {
         // Storing the data in localstorage (cache)
         localStorage.setItem("inherichainWalletAddress", address);
@@ -123,7 +123,7 @@ const initApp = () => {
     }
     inherichain.methods
       .approveHeir(value)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         approverAcceptanceStatus.innerHTML = "Success!";
       })
@@ -139,7 +139,7 @@ const initApp = () => {
     e.preventDefault();
     inherichain.methods
       .initiateCharity()
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         initiateCharityStatus.innerHTML = "Success!";
       })

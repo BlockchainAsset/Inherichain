@@ -49,7 +49,7 @@ const checkRights = () => {
   let backupOwnerHTML = document.getElementById("backupOwnerHTML");
   inherichain.methods
     .backupOwner()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       if (values != accounts[0]) {
         window.alert("You don't have the rights of backup owner.");
@@ -75,7 +75,7 @@ const initWalletAddress = () => {
     inherichain = initContract(address);
     inherichain.methods
       .heir()
-      .call({from: accounts[0]})
+      .call({ from: accounts[0] })
       .then((values) => {
         // Storing the data in localstorage (cache)
         localStorage.setItem("inherichainWalletAddress", address);
@@ -112,7 +112,7 @@ const initApp = () => {
     const address = e.target.elements[0].value;
     inherichain.methods
       .updateOwner(address)
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         backupOwnerUpdateOwnerStatus.innerHTML = "Success!";
       })

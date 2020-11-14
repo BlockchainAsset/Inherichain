@@ -49,7 +49,7 @@ const checkRights = () => {
   let charityHTML = document.getElementById("charityHTML");
   inherichain.methods
     .charity()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       if (values != accounts[0]) {
         window.alert("You don't have the rights of charity.");
@@ -75,7 +75,7 @@ const initWalletAddress = () => {
     inherichain = initContract(address);
     inherichain.methods
       .heir()
-      .call({from: accounts[0]})
+      .call({ from: accounts[0] })
       .then((values) => {
         // Storing the data in localstorage (cache)
         localStorage.setItem("inherichainWalletAddress", address);
@@ -124,7 +124,7 @@ const initApp = () => {
         approverDeadline,
         charityDeadline
       )
-      .send({from: accounts[0]})
+      .send({ from: accounts[0] })
       .then(() => {
         accessWalletCharityStatus.innerHTML = `Success!`;
       })

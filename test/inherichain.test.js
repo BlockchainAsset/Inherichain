@@ -1,6 +1,7 @@
 const Inherichain = artifacts.require("Inherichain");
 const Demo = artifacts.require("Demo");
 const SimpleERC20 = artifacts.require("SimpleERC20");
+const SimpleCentralizedArbitrator = artifacts.require("SimpleCentralizedArbitrator");
 
 const {
   time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -20,6 +21,7 @@ contract("Inherichain (Basic Functions)", (accounts) => {
   let inherichain = null;
   let demo = null;
   let simpleERC20 = null;
+  let arbitrator = null;
   let owner,
     backupOwner,
     heir,
@@ -33,10 +35,16 @@ contract("Inherichain (Basic Functions)", (accounts) => {
     newApproverTwo,
     newApproverThree,
     outsider;
+  const arbitratorExtraData = `0x0`;
+  const metaEvidence = "";
   const sInitial = 0;
   const sHeirClaimed = 1;
-  const sApproverApproved = 2;
-  const sInitiatedCharity = 3;
+  const sClaimDisputed = 2;
+  const sDisputeResultPending =3;
+  const sApproverApproved = 4;
+  const sArbitratorApproved = 5;
+  const sArbitratorRejected = 6;
+  const sInitiatedCharity = 7;
   const deadline = time.duration.days(30).toNumber();
   const approverDeadline = time.duration.days(7).toNumber();
   const charityDeadline = time.duration.days(45).toNumber();
@@ -73,6 +81,7 @@ contract("Inherichain (Basic Functions)", (accounts) => {
     // inherichain = await Inherichain.deployed();
     demo = await Demo.deployed();
     simpleERC20 = await SimpleERC20.deployed();
+    arbitrator = await SimpleCentralizedArbitrator.deployed();
   });
 
   beforeEach("", async () => {
@@ -81,6 +90,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
       backupOwner,
       heir,
       charity,
+      arbitrator.address,
+      arbitratorExtraData,
+      metaEvidence,
       [approverOne, approverTwo, approverThree],
       0,
       0,
@@ -145,6 +157,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
       constants.ZERO_ADDRESS,
       heir,
       constants.ZERO_ADDRESS,
+      arbitrator.address,
+      arbitratorExtraData,
+      metaEvidence,
       [approverOne, approverTwo, approverThree],
       newDeadline,
       newApproverDeadline,
@@ -219,6 +234,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
         owner,
         heir,
         charity,
+        arbitrator.address,
+        arbitratorExtraData,
+        metaEvidence,  
         [approverOne, approverTwo, approverThree],
         newDeadline,
         newApproverDeadline,
@@ -235,6 +253,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
         backupOwner,
         owner,
         charity,
+        arbitrator.address,
+        arbitratorExtraData,
+        metaEvidence,
         [approverOne, approverTwo, approverThree],
         newDeadline,
         newApproverDeadline,
@@ -251,6 +272,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
         backupOwner,
         backupOwner,
         charity,
+        arbitrator.address,
+        arbitratorExtraData,
+        metaEvidence,
         [approverOne, approverTwo, approverThree],
         newDeadline,
         newApproverDeadline,
@@ -267,6 +291,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
         backupOwner,
         constants.ZERO_ADDRESS,
         charity,
+        arbitrator.address,
+        arbitratorExtraData,
+        metaEvidence,
         [approverOne, approverTwo, approverThree],
         newDeadline,
         newApproverDeadline,
@@ -283,6 +310,9 @@ contract("Inherichain (Basic Functions)", (accounts) => {
         backupOwner,
         heir,
         charity,
+        arbitrator.address,
+        arbitratorExtraData,
+        metaEvidence,
         [approverOne, approverOne],
         newDeadline,
         newApproverDeadline,
@@ -371,7 +401,7 @@ contract("Inherichain (Basic Functions)", (accounts) => {
 
   it("Should be able to deposit an ERC20 Token by Outsider.", async () => {
     const valueToDeposit = randomValue();
-    await simpleERC20.transfer(outsider, valueToDeposit, {from: heir});
+    await simpleERC20.transfer(outsider, valueToDeposit, { from: heir });
     await simpleERC20.transfer(inherichain.address, valueToDeposit, {
       from: outsider,
     });

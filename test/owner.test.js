@@ -1,6 +1,7 @@
 const Inherichain = artifacts.require("Inherichain");
 const Demo = artifacts.require("Demo");
 const SimpleERC20 = artifacts.require("SimpleERC20");
+const SimpleCentralizedArbitrator = artifacts.require("SimpleCentralizedArbitrator");
 
 const {
   time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -20,6 +21,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
   let inherichain = null;
   let demo = null;
   let simpleERC20 = null;
+  let arbitrator = null;
   let owner,
     backupOwner,
     heir,
@@ -33,10 +35,16 @@ contract("Inherichain (Owner Functions)", (accounts) => {
     newApproverTwo,
     newApproverThree,
     outsider;
+  const arbitratorExtraData = `0x0`;
+  const metaEvidence = "";
   const sInitial = 0;
   const sHeirClaimed = 1;
-  const sApproverApproved = 2;
-  const sInitiatedCharity = 3;
+  const sClaimDisputed = 2;
+  const sDisputeResultPending =3;
+  const sApproverApproved = 4;
+  const sArbitratorApproved = 5;
+  const sArbitratorRejected = 6;
+  const sInitiatedCharity = 7;
   const deadline = time.duration.days(30).toNumber();
   const approverDeadline = time.duration.days(7).toNumber();
   const charityDeadline = time.duration.days(45).toNumber();
@@ -73,6 +81,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
     // inherichain = await Inherichain.deployed();
     demo = await Demo.deployed();
     simpleERC20 = await SimpleERC20.deployed();
+    arbitrator = await SimpleCentralizedArbitrator.deployed();
   });
 
   beforeEach("", async () => {
@@ -81,6 +90,9 @@ contract("Inherichain (Owner Functions)", (accounts) => {
       backupOwner,
       heir,
       charity,
+      arbitrator.address,
+      arbitratorExtraData,
+      metaEvidence,
       [approverOne, approverTwo, approverThree],
       0,
       0,
@@ -106,7 +118,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Updating Backup Owner by outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.updateBackupOwner(newBackupOwner, {from: outsider}),
+      inherichain.updateBackupOwner(newBackupOwner, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -147,7 +159,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Updating Heir by outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.updateHeir(newHeir, {from: outsider}),
+      inherichain.updateHeir(newHeir, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -177,11 +189,11 @@ contract("Inherichain (Owner Functions)", (accounts) => {
     const cInitialStatus = await inherichain.status();
     const cInitialClaimTime = await inherichain.claimTime();
     const cInitialVoteCount = await inherichain.voteCount();
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     const cAfterClaimStatus = await inherichain.status();
     const cOldClaimTime = await inherichain.claimTime();
-    await inherichain.approveHeir(true, {from: approverOne});
-    await inherichain.approveHeir(true, {from: approverTwo});
+    await inherichain.approveHeir(true, { from: approverOne });
+    await inherichain.approveHeir(true, { from: approverTwo });
     const cAfterApprovalStatus = await inherichain.status();
     const cOldVoteCount = await inherichain.voteCount();
     await inherichain.updateHeir(newHeir);
@@ -393,7 +405,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Adding an approver by outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.addApprover(newApproverOne, {from: outsider}),
+      inherichain.addApprover(newApproverOne, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -447,7 +459,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Deleting an approver by outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.deleteApprover(newApproverOne, {from: outsider}),
+      inherichain.deleteApprover(newApproverOne, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -618,7 +630,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Contract deployment by Outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.deployContract(0, demoBytecode, {from: outsider}),
+      inherichain.deployContract(0, demoBytecode, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -696,14 +708,14 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Should not be able to withdraw all ether by Outsider.", async () => {
     await expectRevert(
-      inherichain.withdrawAllETH({from: outsider}),
+      inherichain.withdrawAllETH({ from: outsider }),
       "Only owner can call this function."
     );
   });
 
   it("Should not be able to withdraw partial ether by Outsider.", async () => {
     await expectRevert(
-      inherichain.withdrawSomeETH(transferValue, {from: outsider}),
+      inherichain.withdrawSomeETH(transferValue, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -740,7 +752,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Should not be able to transfer ether by Outsider.", async () => {
     await expectRevert(
-      inherichain.transferETH(backupOwner, transferValue, {from: outsider}),
+      inherichain.transferETH(backupOwner, transferValue, { from: outsider }),
       "Only owner can call this function."
     );
   });
@@ -757,7 +769,7 @@ contract("Inherichain (Owner Functions)", (accounts) => {
 
   it("Updating an Owner by Outsider should not be possible.", async () => {
     await expectRevert(
-      inherichain.updateOwner(newBackupOwner, {from: outsider}),
+      inherichain.updateOwner(newBackupOwner, { from: outsider }),
       "Only primary or backup owner can call this function."
     );
   });
@@ -777,5 +789,4 @@ contract("Inherichain (Owner Functions)", (accounts) => {
       _changer: owner,
     });
   });
-
 });

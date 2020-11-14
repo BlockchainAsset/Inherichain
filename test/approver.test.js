@@ -1,6 +1,7 @@
 const Inherichain = artifacts.require("Inherichain");
 const Demo = artifacts.require("Demo");
 const SimpleERC20 = artifacts.require("SimpleERC20");
+const SimpleCentralizedArbitrator = artifacts.require("SimpleCentralizedArbitrator");
 
 const {
   time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -20,6 +21,7 @@ contract("Inherichain (Approver Functions)", (accounts) => {
   let inherichain = null;
   let demo = null;
   let simpleERC20 = null;
+  let arbitrator = null;
   let owner,
     backupOwner,
     heir,
@@ -33,10 +35,16 @@ contract("Inherichain (Approver Functions)", (accounts) => {
     newApproverTwo,
     newApproverThree,
     outsider;
+  const arbitratorExtraData = `0x0`;
+  const metaEvidence = "";
   const sInitial = 0;
   const sHeirClaimed = 1;
-  const sApproverApproved = 2;
-  const sInitiatedCharity = 3;
+  const sClaimDisputed = 2;
+  const sDisputeResultPending =3;
+  const sApproverApproved = 4;
+  const sArbitratorApproved = 5;
+  const sArbitratorRejected = 6;
+  const sInitiatedCharity = 7;
   const deadline = time.duration.days(30).toNumber();
   const approverDeadline = time.duration.days(7).toNumber();
   const charityDeadline = time.duration.days(45).toNumber();
@@ -73,6 +81,7 @@ contract("Inherichain (Approver Functions)", (accounts) => {
     // inherichain = await Inherichain.deployed();
     demo = await Demo.deployed();
     simpleERC20 = await SimpleERC20.deployed();
+    arbitrator = await SimpleCentralizedArbitrator.deployed();
   });
 
   beforeEach("", async () => {
@@ -81,6 +90,9 @@ contract("Inherichain (Approver Functions)", (accounts) => {
       backupOwner,
       heir,
       charity,
+      arbitrator.address,
+      arbitratorExtraData,
+      metaEvidence,
       [approverOne, approverTwo, approverThree],
       0,
       0,
@@ -89,10 +101,10 @@ contract("Inherichain (Approver Functions)", (accounts) => {
   });
 
   it("Approving heir by Approver should be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     const cOldVoteCount = await inherichain.voteCount();
     const cOldApproverOneVote = await inherichain.voted(approverOne);
-    await inherichain.approveHeir(true, {from: approverOne});
+    await inherichain.approveHeir(true, { from: approverOne });
     const cNewVoteCount = await inherichain.voteCount();
     const cNewApproverOneVote = await inherichain.voted(approverOne);
     assert.strictEqual(
@@ -113,10 +125,10 @@ contract("Inherichain (Approver Functions)", (accounts) => {
   });
 
   it("Rejecting heir by Approver should be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     const cOldVoteCount = await inherichain.voteCount();
     const cOldApproverOneVote = await inherichain.voted(approverOne);
-    await inherichain.approveHeir(false, {from: approverOne});
+    await inherichain.approveHeir(false, { from: approverOne });
     const cNewVoteCount = await inherichain.voteCount();
     const cNewApproverOneVote = await inherichain.voted(approverOne);
     assert.strictEqual(
@@ -137,62 +149,61 @@ contract("Inherichain (Approver Functions)", (accounts) => {
   });
 
   it("Approving heir by Outsider should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await expectRevert(
-      inherichain.approveHeir(true, {from: outsider}),
+      inherichain.approveHeir(true, { from: outsider }),
       "Only an approver can call this function."
     );
   });
 
   it("Rejecting heir by Outsider should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
+    await inherichain.claimOwnership({ from: heir });
     await expectRevert(
-      inherichain.approveHeir(false, {from: outsider}),
+      inherichain.approveHeir(false, { from: outsider }),
       "Only an approver can call this function."
     );
   });
 
   it("Approving heir by Approver twice should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(true, {from: approverOne});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(true, { from: approverOne });
     await expectRevert(
-      inherichain.approveHeir(true, {from: approverOne}),
+      inherichain.approveHeir(true, { from: approverOne }),
       "Already voted."
     );
   });
 
   it("Rejecting heir by Approver twice should not be possible.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(false, {from: approverOne});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(false, { from: approverOne });
     await expectRevert(
-      inherichain.approveHeir(false, {from: approverOne}),
+      inherichain.approveHeir(false, { from: approverOne }),
       "Already voted."
     );
   });
 
   it("Without heir claiming ownership, voting by Approver should not be possible.", async () => {
     await expectRevert(
-      inherichain.approveHeir(true, {from: approverOne}),
+      inherichain.approveHeir(true, { from: approverOne }),
       "Claim has not started yet."
     );
   });
 
   it("With majority approving heir, the majority vote by Approver should emit heirApproved Event.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    await inherichain.approveHeir(true, {from: approverOne});
-    const receipt = await inherichain.approveHeir(true, {from: approverTwo});
+    await inherichain.claimOwnership({ from: heir });
+    await inherichain.approveHeir(true, { from: approverOne });
+    const receipt = await inherichain.approveHeir(true, { from: approverTwo });
     expectEvent(receipt, "heirApproved", {
       _approveCount: new BN(2),
     });
   });
 
   it("Approving heir by Approver should emit heirApproval Event.", async () => {
-    await inherichain.claimOwnership({from: heir});
-    const receipt = await inherichain.approveHeir(false, {from: approverOne});
+    await inherichain.claimOwnership({ from: heir });
+    const receipt = await inherichain.approveHeir(false, { from: approverOne });
     expectEvent(receipt, "heirApproval", {
       _approver: approverOne,
       _status: false,
     });
   });
-
 });

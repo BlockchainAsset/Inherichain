@@ -43,7 +43,7 @@ Check if the contract have enough balance.
 
 
 
-### `constructor(address _owner, address _backupOwner, address _heir, address _charity, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
+### `constructor(address _owner, address _backupOwner, address payable _heir, address _charity, contract IArbitrator _arbitrator, bytes _arbitratorExtraData, string _metaevidence, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 
 
@@ -58,7 +58,7 @@ Can be used to update the backup owner.
 Owner and the new backup owner cannot be the same.
 
 
-### `updateHeir(address _newHeir)` (public)
+### `updateHeir(address payable _newHeir)` (public)
 
 Can be used to update the heir.
 
@@ -72,6 +72,22 @@ Can be used to update the Charity Address by the Owner. Also reset a initiated c
 
 
 If the charity address is predetermined by owner, then approver cannot nominate a charity.
+
+
+### `updateArbitrator(contract IArbitrator _arbitrator)` (public)
+
+Can be used to update the Arbitrator Address by the Owner.
+
+
+The arbitrator should follow ERC 792 and ERC 1497 standard.
+
+
+### `updateArbitrationFeeDepositTime(uint256 _arbitrationFeeDepositTime)` (public)
+
+Can be used to update the Arbitrator Fee Deposit Time.
+
+
+This is the time the heir have to deposit ETH for arbitration fee.
 
 
 ### `updateDeadline(uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
@@ -154,13 +170,20 @@ Can be used to claim the contract ownership.
 
 This function starts the claim process for heir.
 
+### `reclaimOwnership()` (public)
+
+Can be used to reclaim the contract ownership after a rejected dispute from Arbitrator.
+
+
+Might be used when Owner in health crisis, and approver disputed and won.
+
 ### `_claimOwnership()` (internal)
 
 This is an internal function which takes care of the heir claim process.
 
 
 
-### `accessOwnershipFromApprover(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
+### `accessOwnershipFromApprover(address _backupOwner, address payable _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 Can be used by heir after approver approval.
 
@@ -168,7 +191,15 @@ Can be used by heir after approver approval.
 This function can only be called once majority vote is attained.
 
 
-### `accessOwnershipAfterDeadline(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
+### `accessOwnershipFromArbitrator(address _backupOwner, address payable _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
+
+Can be used by heir after arbitrator approval.
+
+
+This function can only be called once arbitrator approval is attained.
+
+
+### `accessOwnershipAfterDeadline(address _backupOwner, address payable _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 Can be used by heir after deadline has been passed.
 
@@ -176,12 +207,19 @@ Can be used by heir after deadline has been passed.
 This function can be called with or without the approver approvals after the deadline.
 
 
-### `_accessOwnership(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (internal)
+### `_accessOwnership(address _backupOwner, address payable _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (internal)
 
 
 
 This is an internal function which takes care of the ownership transfer tasks.
 
+
+### `payArbitrationFeeForHeir()` (public)
+
+Can be used to pay the arbitration fee for Heir, if approver disputed.
+
+
+Can be paid by anyone.
 
 ### `approveHeir(bool _acceptance)` (public)
 
@@ -191,6 +229,20 @@ Can be used to approve or reject a claim request by heir.
 Only callable if claim has started and approver not already voted.
 
 
+### `disputeHeir()` (public)
+
+Can be used to dispute a Heir Claim, or dispute incorrect heir acceptance.
+
+
+Call scope limited to Approvers to limit spamming.
+
+### `reclaimInitialStatus()` (public)
+
+Can be used by anyone to stop the claim process by heir after arbitration fee deposit time ends.
+
+
+Can be used only after approver made a dispute to claim.
+
 ### `initiateCharity()` (public)
 
 Can be used to initiate the charity process.
@@ -198,12 +250,27 @@ Can be used to initiate the charity process.
 
 Called when owner and heir are no more.
 
-### `accessOwnershipFromCharity(address _backupOwner, address _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
+### `accessOwnershipFromCharity(address _backupOwner, address payable _heir, address[] _approvers, uint256 _deadline, uint256 _approverDeadline, uint256 _charityDeadline)` (public)
 
 Can be used by charity after deadline has been passed.
 
 
 This function can only be called after the approver has initiated the charity.
+
+
+### `rule(uint256 _disputeID, uint256 _ruling)` (public)
+
+Give a ruling for a dispute. Must be called by the arbitrator.
+
+
+
+
+### `submitEvidence(string _evidence)` (public)
+
+Can be used to submit any evidence during the Claim Dispute Period.
+
+
+Only owner, heir or approver can call this function.
 
 
 ### `approversLength() → uint256 count` (public)
@@ -215,7 +282,7 @@ Used for testing and frontend.
 
 
 
-### `contractCreated(address _owner, address _backupOwner, address _heir, address _charity, uint256 _approverCount, uint256 _heirDeadline, uint256 _heirApprovedDeadline, uint256 _charityDeadline)`
+### `contractCreated(address _owner, address _backupOwner, address _heir, address _charity, contract IArbitrator _arbitrator, uint256 _approverCount, uint256 _heirDeadline, uint256 _heirApprovedDeadline, uint256 _charityDeadline, bytes _arbitratorExtraData)`
 
 
 
@@ -241,6 +308,20 @@ The event is used to notify that the heir has been updated and any claim has bee
 
 
 The event is used to notify that the charity has been updated.
+
+
+### `arbitratorUpdated(contract IArbitrator _arbitrator, address _owner)`
+
+
+
+The event is used to notify that the arbitrator has been updated.
+
+
+### `arbitratorFeeDepositTimeUpdated(uint256 _arbitrationFeeDepositTime, address _owner)`
+
+
+
+The event is used to notify that the arbitrator has been updated.
 
 
 ### `deadlineUpdated(uint256 _heirDeadline, uint256 _heirApprovedDeadline, uint256 _charityDeadline, address _owner)`
@@ -286,6 +367,13 @@ This event is emitted when the heir has made a request for access to the contrac
 This event is used to notify when the heir has received the access to the contract.
 
 
+### `claimDisputeCreated(address _funder, contract IArbitrator _arbitrator, uint256 _disputeID)`
+
+
+
+This event is used to notify the claim dispute has been started by arbitrator.
+
+
 ### `heirApproval(address _approver, bool _status)`
 
 
@@ -298,6 +386,20 @@ This event is used to notify the decision by the approver.
 
 
 This event is used to notify when the approval is successful.
+
+
+### `heirDisputed(address _approver)`
+
+
+
+The event is used to notify the heir claim is disputed.
+
+
+### `initialStatusReclaimed(address _initiator)`
+
+
+
+The event is used to notify the initial status is reclaimed.
 
 
 ### `charityInitiated(address _approver)`

@@ -1,36 +1,60 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.0;
 
+import "@kleros/erc-792/contracts/IArbitrator.sol";
+import "@kleros/erc-792/contracts/IArbitrable.sol";
+import "@kleros/erc-792/contracts/erc-1497/IEvidence.sol";
+
 /// @title A wallet which has inheritance built in on the Ethereum Blockchain.
 /// @author Shebin John
 /// @notice Use this contract as a hot wallet without any worry about passing it on to the next generation.
 /// @dev This is an alpha version, it is not yet audited, use with caution.
-contract Inherichain {
+contract Inherichain is IArbitrable, IEvidence {
     /*  Contract Variables  */
 
     uint256 public voteCount; // This counts the yes votes for a heir claim.
     uint256 public claimTime; // The time when the claim was started. Default is zero. Set at the time of claim call.
     uint256 public charityTime; // The time when the charity was initiated. Set at the time of initiation.
+    uint256 public disputeTime; // The time when the dispute was initiated. Set at the time of initiation.
+    uint256 public arbitrationFee; // The ETH required for arbitration, in wei.
     // Below deadline can be changed at the time of contract creation.
     // Deadline also works for owner to reclaim if the heir colluded with approvers.
     uint256 public heirDeadline = 30 days; // Wait time for the heir without approvers approval. Default is 30 days.
     uint256 public heirApprovedDeadline = 7 days; // Wait time for the heir with approvers approval. Default is 7 days.
     uint256 public charityDeadline = 45 days; // Wait time for the charity with approver initiation. Default is 45 days.
+    uint256 public arbitrationFeeDepositTime = 7 days;
+    uint256 constant metaevidenceID = 0; // Unique identifier of meta-evidence.
+    uint256 constant evidenceGroupID = 0; // Unique identifier of the evidence group the evidence belongs to.
 
     address public owner; // The owner of this contract wallet.
     address public backupOwner; // The backup owner, same as owner of this wallet, but with a different address.
-    address public heir; // The heir of this contract.
+    address payable public heir; // The heir of this contract.
     address public charity; // The charity decided by the owner.
     address public charityInitiator; // The approver who initiated the charity.
+    address payable public disputeInitiator; // The approver who initiated the dispute.
+    IArbitrator public arbitrator;
 
     // Different types of Contract State.
-    enum Status {Initial, HeirClaimed, ApproverApproved, InitiatedCharity}
+    enum Status {
+        Initial,
+        HeirClaimed,
+        ClaimDisputed,
+        DisputeResultPending,
+        ApproverApproved,
+        ArbitratorApproved,
+        ArbitratorRejected,
+        InitiatedCharity
+    }
     Status public status; // The current status of the contract.
+
+    enum ClaimRulingOptions {RefusedToArbitrate, OwnerWins, HeirWins}
+    uint256 constant numberOfClaimRulingOptions = 2; // Notice that option 0 is reserved for RefusedToArbitrate.
 
     mapping(address => bool) public approverStatus; // Whether the approver is valid or not.
     mapping(address => bool) public voted; // Whether the approver has voted or not.
 
     address[] public approvers; // Array of approver addresses.
+    bytes public arbitratorExtraData; // Extra data to set up the arbitration.
 
     /*  Events  */
 
@@ -39,19 +63,23 @@ contract Inherichain {
     ///	@param _backupOwner The backup owner of this contract.
     ///	@param _heir The heir of this contract.
     /// @param _charity The charity address preferred by Owner.
+    /// @param _arbitrator The arbitrator address for this contract wallet.
     ///	@param _approverCount The no. of approvers added to the contract.
     ///	@param _heirDeadline The wait time for heir to claim without approval from approvers.
     ///	@param _heirApprovedDeadline The wait time for heir to claim with approval from approvers.
     ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
+    /// @param _arbitratorExtraData Extra data for the arbitrator.
     event contractCreated(
         address indexed _owner,
         address indexed _backupOwner,
         address indexed _heir,
         address _charity,
+        IArbitrator _arbitrator,
         uint256 _approverCount,
         uint256 _heirDeadline,
         uint256 _heirApprovedDeadline,
-        uint256 _charityDeadline
+        uint256 _charityDeadline,
+        bytes _arbitratorExtraData
     );
 
     ///	@dev This event is used to notify that the backup owner has been updated.
@@ -71,6 +99,22 @@ contract Inherichain {
     ///	@param _charity The new charity address.
     ///	@param _changer The one who made the change. It can be either owner or approver.
     event charityUpdated(address indexed _charity, address indexed _changer);
+
+    ///	@dev The event is used to notify that the arbitrator has been updated.
+    ///	@param _arbitrator The new arbitrator address.
+    ///	@param _owner The owner who made this change.
+    event arbitratorUpdated(
+        IArbitrator indexed _arbitrator,
+        address indexed _owner
+    );
+
+    ///	@dev The event is used to notify that the arbitrator has been updated.
+    ///	@param _arbitrationFeeDepositTime The new arbitrator fee deposit time.
+    ///	@param _owner The owner who made this change.
+    event arbitratorFeeDepositTimeUpdated(
+        uint256 indexed _arbitrationFeeDepositTime,
+        address indexed _owner
+    );
 
     ///	@dev The event is used to notify a change in the deadline.
     ///	@param _heirDeadline The wait time for heir to claim without approval from approvers.
@@ -131,6 +175,16 @@ contract Inherichain {
         uint256 _charityDeadline
     );
 
+    /// @dev This event is used to notify the claim dispute has been started by arbitrator.
+    /// @param _funder The person who funded the Heir Dispute Arbitration Fee.
+    /// @param _arbitrator The Arbitrator.
+    /// @param _disputeID The ID created for this dispute.
+    event claimDisputeCreated(
+        address indexed _funder,
+        IArbitrator indexed _arbitrator,
+        uint256 indexed _disputeID
+    );
+
     ///	@dev This event is used to notify the decision by the approver.
     ///	@param _approver The address of the approver.
     ///	@param _status The decision of the approver.
@@ -139,6 +193,14 @@ contract Inherichain {
     ///	@dev This event is used to notify when the approval is successful.
     ///	@param _approveCount The no. of votes received by the heir for approval.
     event heirApproved(uint256 indexed _approveCount);
+
+    /// @dev The event is used to notify the heir claim is disputed.
+    ///	@param _approver The one who initiated the process.
+    event heirDisputed(address indexed _approver);
+
+    /// @dev The event is used to notify the initial status is reclaimed.
+    ///	@param _initiator The one who initiated the process.
+    event initialStatusReclaimed(address indexed _initiator);
 
     ///	@dev The event is used to notify that charity process has been initiated.
     ///	@param _approver The one who initiated the process.
@@ -222,6 +284,9 @@ contract Inherichain {
     ///	@param _backupOwner The backup owner of this contract.
     ///	@param _heir The heir of this contract.
     /// @param _charity The charity address preferred by Owner.
+    /// @param _arbitrator The arbitrator address for this contract wallet.
+    /// @param _arbitratorExtraData Extra data for the arbitrator.
+    /// @param _metaevidence A link to the meta-evidence JSON.
     ///	@param _approvers The approver address array added to the contract.
     ///	@param _deadline The wait time for heir to claim without approval from approvers.
     ///	@param _approverDeadline The wait time for heir to claim with approval from approvers.
@@ -229,8 +294,11 @@ contract Inherichain {
     constructor(
         address _owner,
         address _backupOwner,
-        address _heir,
+        address payable _heir,
         address _charity,
+        IArbitrator _arbitrator,
+        bytes memory _arbitratorExtraData,
+        string memory _metaevidence,
         address[] memory _approvers,
         uint256 _deadline,
         uint256 _approverDeadline,
@@ -266,6 +334,10 @@ contract Inherichain {
             charity = _charity;
         }
 
+        arbitrator = _arbitrator;
+
+        arbitratorExtraData = _arbitratorExtraData;
+
         for (uint256 user = 0; user < _approvers.length; user++) {
             // To add approver only once.
             require(
@@ -288,15 +360,19 @@ contract Inherichain {
             charityDeadline = _charityDeadline;
         }
 
+        emit MetaEvidence(metaevidenceID, _metaevidence);
+
         emit contractCreated(
             owner,
             _backupOwner,
             _heir,
             _charity,
+            _arbitrator,
             _approvers.length,
             heirDeadline,
             heirApprovedDeadline,
-            charityDeadline
+            charityDeadline,
+            _arbitratorExtraData
         );
     }
 
@@ -323,7 +399,7 @@ contract Inherichain {
     ///	@notice Can be used to update the heir.
     ///	@dev Can also be used if the heir tried to access contract before the owner demise along with approvers.
     ///	@param _newHeir The address of the new heir.
-    function updateHeir(address _newHeir)
+    function updateHeir(address payable _newHeir)
         public
         onlyOwner
         checkAddress(_newHeir)
@@ -360,6 +436,40 @@ contract Inherichain {
             deleteApprover(charityInitiator);
         }
         emit charityUpdated(_charity, msg.sender);
+    }
+
+    /// @notice Can be used to update the Arbitrator Address by the Owner.
+    /// @dev The arbitrator should follow ERC 792 and ERC 1497 standard.
+    /// @param _arbitrator The address of the Arbitrator.
+    function updateArbitrator(IArbitrator _arbitrator)
+        public
+        onlyOwner
+        checkAddress(address(_arbitrator))
+    {
+        require(
+            status == Status.Initial,
+            "Can only update arbitrator in Initial State."
+        );
+        arbitrator = _arbitrator;
+        emit arbitratorUpdated(_arbitrator, msg.sender);
+    }
+
+    /// @notice Can be used to update the Arbitrator Fee Deposit Time.
+    /// @dev This is the time the heir have to deposit ETH for arbitration fee.
+    /// @param _arbitrationFeeDepositTime The time provided for deposit.
+    function updateArbitrationFeeDepositTime(uint256 _arbitrationFeeDepositTime)
+        public
+        onlyOwner
+    {
+        require(
+            status == Status.Initial,
+            "Can only update arbitrator in Initial State."
+        );
+        arbitrationFeeDepositTime = _arbitrationFeeDepositTime;
+        emit arbitratorFeeDepositTimeUpdated(
+            _arbitrationFeeDepositTime,
+            msg.sender
+        );
     }
 
     ///	@notice Can be used to update the deadlines.
@@ -543,8 +653,21 @@ contract Inherichain {
         _claimOwnership();
     }
 
+    ///	@notice Can be used to reclaim the contract ownership after a rejected dispute from Arbitrator.
+    ///	@dev Might be used when Owner in health crisis, and approver disputed and won.
+    function reclaimOwnership() public onlyHeir {
+        require(status == Status.ArbitratorRejected, "Claim already started.");
+        _claimOwnership();
+    }
+
     /// @notice This is an internal function which takes care of the heir claim process.
     function _claimOwnership() internal {
+        // The below is used when the owner is not able to prove he is alive due to some health issue or so.
+        // And the approver disputes the claim from heir. This ensures the heir can claim once in a while.
+        require(
+            claimTime < block.timestamp,
+            "Wait period after an arbitrator rejection or without dispute fee deposit is not over."
+        );
         status = Status.HeirClaimed;
         claimTime = block.timestamp;
         if (charityTime != 0) {
@@ -564,7 +687,7 @@ contract Inherichain {
     ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function accessOwnershipFromApprover(
         address _backupOwner,
-        address _heir,
+        address payable _heir,
         address[] memory _approvers,
         uint256 _deadline,
         uint256 _approverDeadline,
@@ -574,6 +697,41 @@ contract Inherichain {
             status == Status.ApproverApproved,
             "Majority vote required to access ownership."
         );
+        require(
+            block.timestamp - claimTime > heirApprovedDeadline,
+            "Deadline has not passed."
+        );
+        _accessOwnership(
+            _backupOwner,
+            _heir,
+            _approvers,
+            _deadline,
+            _approverDeadline,
+            _charityDeadline
+        );
+    }
+
+    ///	@notice Can be used by heir after arbitrator approval.
+    ///	@dev This function can only be called once arbitrator approval is attained.
+    ///	@param _backupOwner The new backup owner of this contract.
+    ///	@param _heir The new heir of this contract.
+    ///	@param _approvers The new approver address array added to the contract.
+    ///	@param _deadline The new wait time for heir to claim without approval from approvers.
+    ///	@param _approverDeadline The new wait time for heir to claim with approval from approvers.
+    ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
+    function accessOwnershipFromArbitrator(
+        address _backupOwner,
+        address payable _heir,
+        address[] memory _approvers,
+        uint256 _deadline,
+        uint256 _approverDeadline,
+        uint256 _charityDeadline
+    ) public onlyHeir {
+        require(
+            status == Status.ArbitratorApproved,
+            "Arbitrator Approval Required."
+        );
+        // This is just a precautionary wait time, removing it won't affect the security.
         require(
             block.timestamp - claimTime > heirApprovedDeadline,
             "Deadline has not passed."
@@ -598,7 +756,7 @@ contract Inherichain {
     ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function accessOwnershipAfterDeadline(
         address _backupOwner,
-        address _heir,
+        address payable _heir,
         address[] memory _approvers,
         uint256 _deadline,
         uint256 _approverDeadline,
@@ -627,7 +785,7 @@ contract Inherichain {
     ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function _accessOwnership(
         address _backupOwner,
-        address _heir,
+        address payable _heir,
         address[] memory _approvers,
         uint256 _deadline,
         uint256 _approverDeadline,
@@ -656,6 +814,27 @@ contract Inherichain {
         );
     }
 
+    /// @notice Can be used to pay the arbitration fee for Heir, if approver disputed.
+    /// @dev Can be paid by anyone.
+    function payArbitrationFeeForHeir() public payable {
+        require(status == Status.ClaimDisputed, "Claim is not disputed.");
+        uint256 cost = arbitrator.arbitrationCost(arbitratorExtraData);
+        require(msg.value >= cost, "Arbitration Fee insufficient.");
+        if (msg.value < arbitrationFee) {
+            // This ensures that atleast a minimum arbitration fee is returned to winner.
+            // (in case the fee changes during dispute)
+            arbitrationFee = msg.value;
+        }
+        // The arbitrator will check if the fee send is adequate and refund the remaining.
+        uint256 disputeID =
+            arbitrator.createDispute{value: cost}(
+                numberOfClaimRulingOptions,
+                arbitratorExtraData
+            );
+        status = Status.DisputeResultPending;
+        emit claimDisputeCreated(msg.sender, arbitrator, disputeID);
+    }
+
     /*  Approver Functions  */
 
     ///	@notice Can be used to approve or reject a claim request by heir.
@@ -673,6 +852,42 @@ contract Inherichain {
             }
         }
         emit heirApproval(msg.sender, _acceptance);
+    }
+
+    /// @notice Can be used to dispute a Heir Claim, or dispute incorrect heir acceptance.
+    /// @dev Call scope limited to Approvers to limit spamming.
+    function disputeHeir() public payable onlyApprover {
+        require(
+            status == Status.HeirClaimed || status == Status.ApproverApproved,
+            "Claim has not started yet or Claim was approved incorrectly."
+        );
+        uint256 cost = arbitrator.arbitrationCost(arbitratorExtraData);
+        require(msg.value >= cost, "Arbitration Fee not sufficient.");
+        // It is the responsibility of the ethereum address to receive the remaining eth back.
+        msg.sender.send(cost - msg.value);
+        status = Status.ClaimDisputed;
+        disputeTime = block.timestamp;
+        arbitrationFee = cost;
+        disputeInitiator = msg.sender;
+        emit heirDisputed(msg.sender);
+    }
+
+    /// @notice Can be used by anyone to stop the claim process by heir after arbitration fee deposit time ends.
+    /// @dev Can be used only after approver made a dispute to claim.
+    function reclaimInitialStatus() public {
+        require(status == Status.ClaimDisputed, "Claim is not disputed.");
+        require(
+            block.timestamp - disputeTime > arbitrationFeeDepositTime,
+            "The heir Arbitration fee deposit time not over."
+        );
+        claimTime = block.timestamp + heirDeadline; // This ensures the heir can claim once in a while.
+        // It is the responsibility of the ethereum address to receive the remaining eth back.
+        disputeInitiator.send(arbitrationFee);
+        status = Status.Initial;
+        disputeTime = 0;
+        arbitrationFee = 0;
+        disputeInitiator = address(0);
+        emit initialStatusReclaimed(msg.sender);
     }
 
     /// @notice Can be used to initiate the charity process.
@@ -701,7 +916,7 @@ contract Inherichain {
     ///	@param _charityDeadline The wait time for charity to claim with initiation from approvers.
     function accessOwnershipFromCharity(
         address _backupOwner,
-        address _heir,
+        address payable _heir,
         address[] memory _approvers,
         uint256 _deadline,
         uint256 _approverDeadline,
@@ -727,6 +942,59 @@ contract Inherichain {
             _approverDeadline,
             _charityDeadline
         );
+    }
+
+    /* Arbitrator */
+
+    /// @notice Give a ruling for a dispute. Must be called by the arbitrator.
+    /// @param _disputeID ID of the dispute in the Arbitrator contract.
+    /// @param _ruling Result of arbitration (including refused to arbitrate).
+    function rule(uint256 _disputeID, uint256 _ruling) public override {
+        require(
+            msg.sender == address(arbitrator),
+            "Only the arbitrator can execute this."
+        );
+        require(
+            status == Status.DisputeResultPending,
+            "There should be a dispute to execute a ruling."
+        );
+        require(_ruling <= numberOfClaimRulingOptions, "Ruling out of bounds!");
+        if (_ruling == 1) {
+            status = Status.ArbitratorApproved;
+            heir.send(arbitrationFee);
+        } else if (_ruling == 2) {
+            status = Status.ArbitratorRejected;
+            disputeInitiator.send(arbitrationFee);
+        } else {
+            status = Status.Initial;
+            // If wei is an odd number, then it will be added to the owner assets.
+            uint256 half = arbitrationFee / 2;
+            heir.send(half);
+            disputeInitiator.send(half);
+        }
+        disputeTime = 0;
+        arbitrationFee = 0;
+        disputeInitiator = address(0);
+        emit Ruling(arbitrator, _disputeID, _ruling);
+    }
+
+    /* General Functions */
+
+    /// @notice Can be used to submit any evidence during the Claim Dispute Period.
+    /// @dev Only owner, heir or approver can call this function.
+    /// @param _evidence A URI to the evidence JSON file whose name should be its keccak256 hash followed by .json.
+    function submitEvidence(string memory _evidence) public {
+        require(
+            status == Status.ClaimDisputed,
+            "Contract is not in Disputed state."
+        );
+        require(
+            msg.sender == heir ||
+                msg.sender == owner ||
+                approverStatus[msg.sender],
+            "Third parties are not allowed to submit evidence."
+        );
+        emit Evidence(arbitrator, evidenceGroupID, msg.sender, _evidence);
     }
 
     /*  Read/Getter Functions  */

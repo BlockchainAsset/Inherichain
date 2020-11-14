@@ -79,7 +79,7 @@ const initWalletAddress = () => {
     inherichain = initContract(address);
     inherichain.methods
       .heir()
-      .call({from: accounts[0]})
+      .call({ from: accounts[0] })
       .then((values) => {
         // Storing the data in localstorage (cache)
         localStorage.setItem("inherichainWalletAddress", address);
@@ -136,7 +136,7 @@ const getData = () => {
 
   inherichain.methods
     .owner()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       currentOwner.innerHTML = values;
     })
@@ -147,7 +147,7 @@ const getData = () => {
 
   inherichain.methods
     .backupOwner()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       currentBackupOwner.innerHTML = values;
     })
@@ -159,7 +159,7 @@ const getData = () => {
 
   inherichain.methods
     .heir()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       currentHeir.innerHTML = values;
     })
@@ -170,7 +170,7 @@ const getData = () => {
 
   inherichain.methods
     .charity()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       currentCharity.innerHTML = values;
     })
@@ -181,7 +181,7 @@ const getData = () => {
 
   inherichain.methods
     .approversLength()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       approversLength = values;
       approvers.innerHTML =
@@ -189,7 +189,7 @@ const getData = () => {
       for (let index = 0; index < approversLength; index++) {
         inherichain.methods
           .approvers(index)
-          .call({from: accounts[0]})
+          .call({ from: accounts[0] })
           .then((values) => {
             let temp = index + 1;
             approvers.innerHTML +=
@@ -212,7 +212,7 @@ const getData = () => {
 
   inherichain.methods
     .heirDeadline()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       deadline.innerHTML = convertSectoDay(values);
     })
@@ -223,7 +223,7 @@ const getData = () => {
 
   inherichain.methods
     .heirApprovedDeadline()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       approverDeadline.innerHTML = convertSectoDay(values);
     })
@@ -234,7 +234,7 @@ const getData = () => {
 
   inherichain.methods
     .charityDeadline()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       charityDeadline.innerHTML = convertSectoDay(values);
     })
@@ -245,7 +245,7 @@ const getData = () => {
 
   inherichain.methods
     .status()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       contractStatus.innerHTML = status[values];
     })
@@ -256,7 +256,7 @@ const getData = () => {
 
   inherichain.methods
     .claimTime()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       claimTime.innerHTML = values;
     })
@@ -267,7 +267,7 @@ const getData = () => {
 
   inherichain.methods
     .voteCount()
-    .call({from: accounts[0]})
+    .call({ from: accounts[0] })
     .then((values) => {
       voteCount.innerHTML = values;
     })
