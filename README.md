@@ -19,6 +19,7 @@ A basic description of all the functions, modifiers, and events are specified in
 **Admin** can :
 - Update the Backup Owner.
 - Update the Heir (Resets the Claim Process).
+- Update the arbitrator.
 - Update the Deadlines.
 - Add new Approvers.
 - Delete old Approvers.
@@ -31,18 +32,24 @@ A basic description of all the functions, modifiers, and events are specified in
 - Update the Owner.
 
 **Heir** can :
-- Start the Claim.
-- Access Ownership using Approver Votes or Complete Deadline.
+- Start/Restart the Claim.
+- Access Ownership using Approver Votes, Completed Deadline or Arbitrator Approval.
 
 **Approver** can :
 - Approve or Reject Heir.
+- Dispute the Claim of Heir.
 - Initiate Charity Process.
 
 **Charity** can :
 - Access Ownership after approver Initiation.
 
+**Arbitrator** can:
+- Rule on the disputed claim of heir by approver.
+
 **Every User** can :
 - Deposit ETH and other assets.
+- Pay for arbitration fee of Heir after Claim dispute.
+- Reclaim the Initial Status after Heir fails to pay arbitration fee on time.
 
 ## Enhancement to do:
 - Involve Kleros if heir & owner demise at the same time to choose what to do with the funds.
@@ -63,11 +70,11 @@ A basic description of all the functions, modifiers, and events are specified in
 
 5. Now run `ganache-cli` and copy the mnemonic, address, and private key part for later use. (Make sure it runs on port 8545 if you intend to run the `truffle test` command).
 
-6. In a command line, run `truffle migrate --reset`.
+6. In a command line, run `npm run migrate`.
 
 7. (Optional) If you want, you can run the `truffle test` to see if it passes all tests or not.
 
-8. To run the frontend part, just use `npm start` and it will start a server in localhost.
+8. To run the frontend part, just use `npm start` (for hosted solutions like Heroku/Netlify, etc) or `npm run local-server` (if running locally) and it will start a server in localhost.
 
 ## How to Test the Contract
 
