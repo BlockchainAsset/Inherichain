@@ -22,7 +22,7 @@ contract Inherichain is IArbitrable, IEvidence {
     uint256 public heirDeadline = 30 days; // Wait time for the heir without approvers approval. Default is 30 days.
     uint256 public heirApprovedDeadline = 7 days; // Wait time for the heir with approvers approval. Default is 7 days.
     uint256 public charityDeadline = 45 days; // Wait time for the charity with approver initiation. Default is 45 days.
-    uint256 public arbitrationFeeDepositTime = 7 days;
+    uint256 public arbitrationFeeDepositTime = 10 days;
     uint256 constant metaevidenceID = 0; // Unique identifier of meta-evidence.
     uint256 constant evidenceGroupID = 0; // Unique identifier of the evidence group the evidence belongs to.
 
@@ -649,7 +649,10 @@ contract Inherichain is IArbitrable, IEvidence {
     ///	@notice Can be used to claim the contract ownership.
     ///	@dev This function starts the claim process for heir.
     function claimOwnership() public onlyHeir {
-        require(status != Status.HeirClaimed, "Claim already started.");
+        require(
+            status == Status.Initial,
+            "Contract should be in Initial State."
+        );
         _claimOwnership();
     }
 
@@ -662,6 +665,7 @@ contract Inherichain is IArbitrable, IEvidence {
 
     /// @notice This is an internal function which takes care of the heir claim process.
     function _claimOwnership() internal {
+        require(status != Status.HeirClaimed, "Claim already started.");
         // The below is used when the owner is not able to prove he is alive due to some health issue or so.
         // And the approver disputes the claim from heir. This ensures the heir can claim once in a while.
         require(
@@ -965,6 +969,7 @@ contract Inherichain is IArbitrable, IEvidence {
         } else if (_ruling == 2) {
             status = Status.ArbitratorRejected;
             disputeInitiator.send(arbitrationFee);
+            claimTime = block.timestamp + heirDeadline; // This ensures the heir can claim once in a while.
         } else {
             status = Status.Initial;
             // If wei is an odd number, then it will be added to the owner assets.

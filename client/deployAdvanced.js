@@ -5,7 +5,7 @@ import Arbitrator from "../build/contracts/SimpleCentralizedArbitrator.json";
 
 let web3;
 let inherichain;
-let arbitrator;
+let arbitratorContract;
 let accounts = [];
 let arbitratorExtraData = `0x0`;
 let metaEvidence = "";
@@ -47,35 +47,67 @@ const initApp = () => {
   createWallet.addEventListener("submit", async (e) => {
     createWalletStatus.innerHTML = "Transaction Pending...";
     e.preventDefault();
-    let heir = e.target.elements[0].value;
-    let approverOne = e.target.elements[1].value;
+    let owner = e.target.elements[0].value;
+    let backupOwner = e.target.elements[1].value;
+    let heir = e.target.elements[2].value;
+    let charity = e.target.elements[3].value;
+    let arbitrator = e.target.elements[4].value;
+    if (e.target.elements[5].value != "") {
+      arbitratorExtraData = e.target.elements[5].value;
+    }
+    if (e.target.elements[6].value != "") {
+      metaEvidence = e.target.elements[6].value;
+    }
+    let approverOne = e.target.elements[7].value;
+    let approverTwo = e.target.elements[8].value;
+    let approverThree = e.target.elements[9].value;
+    let deadline = Number(e.target.elements[10].value);
+    let approverDeadline = Number(e.target.elements[11].value);
+    let charityDeadline = Number(e.target.elements[12].value);
 
     let approvers = [];
-    let owner = constants.ZERO_ADDRESS;
-    let backupOwner = constants.ZERO_ADDRESS;
-    let charity = constants.ZERO_ADDRESS;
+    // Check if blank or address.
+    if (owner == "") {
+      owner = accounts[0];
+    }
+    if (backupOwner == "") {
+      backupOwner = constants.ZERO_ADDRESS;
+    }
+    if (charity == "") {
+      charity = constants.ZERO_ADDRESS;
+    }
     if (approverOne != "") {
       approvers.push(approverOne);
     }
+    if (approverTwo != "") {
+      approvers.push(approverTwo);
+    }
+    if (approverThree != "") {
+      approvers.push(approverThree);
+    }
     inherichain = await new web3.eth.Contract(Inherichain.abi);
-    arbitrator = await new web3.eth.Contract(Arbitrator.abi);
+    arbitratorContract = await new web3.eth.Contract(Arbitrator.abi);
     let arbitratorAddress = "";
-    await arbitrator
-      .deploy({
-        data: Arbitrator.bytecode,
-      })
-      .send({
-        from: accounts[0],
-      })
-      .then((instance) => {
-        arbitrator = instance;
-        arbitratorAddress = arbitrator.options.address;
-        // Storing the data in localstorage (cache)
-        localStorage.setItem(
-          "simpleCentralizedArbitratorAddress",
-          arbitratorAddress
-        );
-      });
+    if (arbitrator == "Kleros" || arbitrator == "kleros") {
+      await arbitratorContract
+        .deploy({
+          data: Arbitrator.bytecode,
+        })
+        .send({
+          from: accounts[0],
+        })
+        .then((instance) => {
+          arbitratorContract = instance;
+          arbitratorAddress = arbitratorContract.options.address;
+          // Storing the data in localstorage (cache)
+          localStorage.setItem(
+            "simpleCentralizedArbitratorAddress",
+            arbitratorAddress
+          );
+        });
+    } else {
+      arbitratorAddress = arbitrator;
+    }
     await inherichain
       .deploy({
         data: Inherichain.bytecode,
@@ -88,9 +120,9 @@ const initApp = () => {
           arbitratorExtraData,
           metaEvidence,
           approvers,
-          0,
-          0,
-          0,
+          deadline,
+          approverDeadline,
+          charityDeadline,
         ],
       })
       .send({

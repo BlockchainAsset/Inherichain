@@ -66,6 +66,9 @@ const checkRights = () => {
 };
 
 const initWalletAddress = () => {
+  let backupOwnerHTML = document.getElementById("backupOwnerHTML");
+  backupOwnerHTML.innerHTML =
+    '<div class="row"><div class="col-sm-12"><h1>Interact with your Wallet Contract</h1><div class="row"><div class="col-sm-12"><form id="setAddress"><div class="form-group"><label for="walletAddress">Wallet Contract Address :</label><input id="walletAddress" type="text" class="form-control"></div><button type="submit" class="btn btn-info">Interact</button><div id="interactStatus"></div></form></div></div></div></div>';
   const setAddress = document.getElementById("setAddress");
   const walletAddress = document.getElementById("walletAddress");
   walletAddress.value = localStorage.getItem("inherichainWalletAddress");

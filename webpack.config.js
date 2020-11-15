@@ -5,6 +5,7 @@ module.exports = {
     entry: {
       index: './client/index.js',
       deploy: './client/deploy.js',
+      deployAdvanced: './client/deployAdvanced.js',
       interact: './client/interact.js',
       owner: './client/owner.js',
       backupOwner: './client/backupOwner.js',

@@ -13,6 +13,9 @@ app.get('/', (req, res) => {
 app.get('/deploy.html', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'deploy.html'));
 });
+app.get('/deployAdvanced.html', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'deployAdvanced.html'));
+});
 app.get('/interact.html', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'interact.html'));
 });

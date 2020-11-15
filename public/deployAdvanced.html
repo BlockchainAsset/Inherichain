@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Inherichain - Create New Wallet!</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="deployAdvanced.js"></script>
+	<style>
+		h1 {
+			margin-top: 5%;
+		}
+
+		label {
+			margin-top: 5px;
+		}
+	</style>
+</head>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="/">Inherichain</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+			<div class="navbar-nav ml-auto">
+				<a class="nav-item nav-link" href="/">Home</a>
+				<a class="nav-item nav-link active" href="deploy.html">Deploy</a>
+				<a class="nav-item nav-link" href="interact.html">Interact</a>
+		  	</div>
+		</div>
+	</nav>
+
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1>Create New Wallet!</h1>
+				<hr>
+				<form id="createWallet">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-sm-6">
+								<label for="setOwner">Owner :</label>
+								<input id="setOwner" type="text" class="form-control" placeholder="Leave blank for current address.">
+							</div>
+							<div class="col-sm-6">
+								<label for="setBackupOwner">Backup Owner :</label>
+								<input id="setBackupOwner" type="text" class="form-control" placeholder="Leave blank if no backup owner.">
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-sm-6">
+								<label for="setHeir">Heir :</label>
+								<input id="setHeir" type="text" class="form-control" placeholder="Enter heir address." required>		
+							</div>
+							<div class="col-sm-6">
+								<label for="setCharity">Charity :</label>
+								<input id="setCharity" type="text" class="form-control" placeholder="Leave blank if no charity address.">
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-sm-4">
+								<label for="setArbitrator">Arbitrator :</label>
+								<input id="setArbitrator" type="text" class="form-control" placeholder="Should follow ERC 792 and 1497." value="Kleros" required>
+							</div>
+							<div class="col-sm-4">
+								<label for="setArbitratorExtraData">Arbitrator Extra Data :</label>
+								<input id="setArbitratorExtraData" type="text" class="form-control" placeholder="Enter arbitrator extra data.">
+							</div>
+							<div class="col-sm-4">
+								<label for="setMetaEvidence">Meta Evidence :</label>
+								<input id="setMetaEvidence" type="text" class="form-control" placeholder="Enter meta evidence.">
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-sm-4">
+								<label for="setApproverOne">Approver 1 :</label>
+								<input id="setApproverOne" type="text" class="form-control" placeholder="Enter Approver One Address." required>
+							</div>
+							<div class="col-sm-4">
+								<label for="setApproverTwo">Approver 2 :</label>
+								<input id="setApproverTwo" type="text" class="form-control" placeholder="Enter Approver Two Address.">
+							</div>
+							<div class="col-sm-4">
+								<label for="setApproverThree">Approver 3 :</label>
+								<input id="setApproverThree" type="text" class="form-control" placeholder="Enter Approver Three Address.">
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="col-sm-4">
+								<label for="setDeadline">Deadline :</label>
+								<input id="setDeadline" type="number" class="form-control" placeholder="Enter deadline duration.">		
+							</div>
+							<div class="col-sm-4">
+								<label for="setApproverDeadline">Approver Deadline :</label>
+								<input id="setApproverDeadline" type="number" class="form-control" placeholder="Enter approver deadline duration.">
+							</div>
+							<div class="col-sm-4">
+								<label for="setCharityDeadline">Charity Deadline :</label>
+								<input id="setCharityDeadline" type="number" class="form-control" placeholder="Enter charity deadline duration.">
+							</div>
+						</div>
+					</div>
+					<button type="submit" class="btn btn-primary">Submit</button>
+					<div id="createWalletStatus"></div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

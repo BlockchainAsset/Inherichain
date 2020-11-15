@@ -1,5 +1,7 @@
 const Inherichain = artifacts.require("Inherichain");
-const SimpleCentralizedArbitrator = artifacts.require("SimpleCentralizedArbitrator");
+const SimpleCentralizedArbitrator = artifacts.require(
+  "SimpleCentralizedArbitrator"
+);
 
 module.exports = function (deployer, network, accounts) {
   var owner,
@@ -18,8 +20,7 @@ module.exports = function (deployer, network, accounts) {
     approverTwo,
     approverThree,
   ] = accounts;
-  deployer.deploy(SimpleCentralizedArbitrator)
-  .then(function() {
+  deployer.deploy(SimpleCentralizedArbitrator).then(function () {
     return deployer.deploy(
       Inherichain,
       owner,

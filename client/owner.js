@@ -49,7 +49,7 @@ const checkRights = () => {
         window.alert("You don't have the rights of owner.");
       } else {
         ownerHTML.innerHTML =
-          '<h3>Welcome Owner!</h3><hr><div class="row"><div class="col-sm-6"><h5>Update Backup Owner</h5><form id="ownerUpdateBackupOwner"><div class="form-group"><label for="updateBackupOwner">Enter New Backup Owner Address :</label><input type="text" id="updateBackupOwner" class="form-control"></div><button type="submit" class="btn btn-secondary">Update</button><div id="ownerUpdateBackupOwnerStatus"></div></form></div><div class="col-sm-6"><h5>Update Heir</h5><form id="ownerUpdateHeir"><div class="form-group"><label for="updateHeir">Enter New Heir Address :</label><input type="text" id="updateHeir" class="form-control"></div><button type="submit" class="btn btn-secondary">Update</button><div id="ownerUpdateHeirStatus"></div></form></div><div class="col-sm-6"><h5>Update Charity</h5><form id="ownerUpdateCharity"><div class="form-group"><label for="updateCharity">Enter New Charity Address :</label><input type="text" id="updateCharity" class="form-control"></div><button type="submit" class="btn btn-secondary">Update</button><div id="ownerUpdateCharityStatus"></div></form></div></div><hr><div class="row"><div class="col-sm-6"><h5>Add New Approver</h5><form id="ownerAddApprover"><div class="form-group"><label for="addApprover">Enter New Approver Address :</label><input type="text" id="addApprover" class="form-control"></div><button type="submit" class="btn btn-primary">Add</button><div id="ownerAddApproverStatus"></div></form></div><div class="col-sm-6"><h5>Delete Approver</h5><form id="ownerDeleteApprover"><div class="form-group"><label for="deleteApprover">Enter Approver Address to Delete :</label><input type="text" id="deleteApprover" class="form-control"></div><button type="submit" class="btn btn-danger">Delete</button><div id="ownerDeleteApproverStatus"></div></form></div></div><hr><div class="row"><div class="col-sm-12"><form id="ownerUpdateDeadline"><h5>Update Deadline & Approver Deadline</h5><div class="form-group"><label for="updateDeadline">Enter New Deadline Duration (in seconds) :</label><input type="text" id="updateDeadline" class="form-control"placeholder="Leave Blank to only update other Deadlines"><label for="updateApproverDeadline">Enter New Approver Deadline Duration (inseconds) :</label><input type="text" id="updateApproverDeadline" class="form-control"placeholder="Leave Blank to only update other Deadlines"><label for="updateCharityDeadline">Enter New Charity Deadline Duration (inseconds) :</label><input type="text" id="updateCharityDeadline" class="form-control"placeholder="Leave Blank to only update other Deadlines"></div><button type="submit" class="btn btn-secondary">Update</button><div id="ownerUpdateDeadlineStatus"></div></form></div></div><hr><div class="row"><div class="col-sm-5"><h5>Transfer ETH</h5><form id="ownerTransferSomeETH"><div class="form-group"><label for="transferSomeETHAmount">Enter ETH to transfer :</label><input type="number" id="transferSomeETHAmount" class="form-control" step="any"><label for="transferSomeETHAddress">Enter the receiver address :</label><input type="text" id="transferSomeETHAddress" class="form-control"></div><button type="submit" class="btn btn-success">Update</button><div id="ownerTransferSomeETHStatus"></div></form></div><div class="col-sm-4"><h5>Withdraw ETH</h5><form id="ownerWithdrawSomeETH"><div class="form-group"><label for="withdrawSomeETH">Enter ETH to withdraw :</label><input type="number" id="withdrawSomeETH" class="form-control" step="any"></div><button type="submit" class="btn btn-success">Withdraw</button><div id="ownerWithdrawSomeETHStatus"></div></form></div><div class="col-sm-3"><h5>Withdraw All ETH</h5><form id="ownerWithdrawAllETH"><div class="form-group"><label for="withdrawAllETH">Click to withdraw All ETH.</label></div><button type="submit" class="btn btn-success">Withdraw</button><div id="ownerWithdrawAllETHStatus"></div></form></div></div><hr><div class="row"><div class="col-sm-6"><form id="ownerInteract"><h5>Interact with other contract (Fallback function)</h5><div class="form-group"><label for="addMsgValue">Enter Value to Sent (in ETH) :</label><input type="number" id="addMsgValue" class="form-control" step="any"><label for="addMsgData">Enter Message Data :</label><input type="text" id="addMsgData" class="form-control"></div><button type="submit" class="btn btn-secondary">Interact</button><div id="ownerInteractStatus"></div></form></div><div class="col-sm-6"><form id="ownerDeployContract"><h5>Deploy Contract</h5><div class="form-group"><label for="addContractValue">Enter Value to Sent (in ETH) :</label><input type="number" id="addContractValue" class="form-control" step="any"><label for="addContractBytecode">Enter Contract Bytecode :</label><input type="text" id="addContractBytecode" class="form-control"></div><button type="submit" class="btn btn-primary">Create</button><div id="ownerDeployContractStatus"></div></form></div></div><hr><hr><hr>';
+          '<h3>Welcome Owner!</h3><hr /><div class="row"> <div class="col-sm-6"> <h5>Update Backup Owner</h5> <form id="ownerUpdateBackupOwner"> <div class="form-group"> <label for="updateBackupOwner">Enter New Backup Owner Address : </label> <input type="text" id="updateBackupOwner" class="form-control" /> </div> <button type="submit" class="btn btn-secondary">Update</button> <div id="ownerUpdateBackupOwnerStatus"></div> </form> </div> <div class="col-sm-6"> <h5>Update Heir</h5> <form id="ownerUpdateHeir"> <div class="form-group"> <label for="updateHeir">Enter New Heir Address : </label> <input type="text" id="updateHeir" class="form-control" /> </div> <button type="submit" class="btn btn-secondary">Update</button> <div id="ownerUpdateHeirStatus"></div> </form> </div> <div class="col-sm-6"> <h5>Update Charity</h5> <form id="ownerUpdateCharity"> <div class="form-group"> <label for="updateCharity">Enter New Charity Address : </label> <input type="text" id="updateCharity" class="form-control" /> </div> <button type="submit" class="btn btn-secondary">Update</button> <div id="ownerUpdateCharityStatus"></div> </form> </div></div><hr /><div class="row"> <div class="col-sm-6"> <h5>Update Arbitrator</h5> <form id="ownerUpdateArbitrator"> <div class="form-group"> <label for="updateArbitrator">Enter New Arbitrator Address : </label> <input type="text" id="updateArbitrator" class="form-control" /> </div> <button type="submit" class="btn btn-secondary">Update</button> <div id="ownerUpdateArbitratorStatus"></div> </form> </div> <div class="col-sm-6"> <h5>Update Arbitration Fee Deposit Time</h5> <form id="ownerUpdateArbitrationFeeDepositTime"> <div class="form-group"> <label for="updateArbitrationFeeDepositTime">Enter New Arbitration Fee Deposit Time : </label> <input type="text" id="updateArbitrationFeeDepositTime" class="form-control" /> </div> <button type="submit" class="btn btn-secondary">Update</button> <div id="ownerUpdateArbitrationFeeDepositTimeStatus"></div> </form> </div></div><hr /><div class="row"> <div class="col-sm-6"> <h5>Add New Approver</h5> <form id="ownerAddApprover"> <div class="form-group"> <label for="addApprover">Enter New Approver Address : </label> <input type="text" id="addApprover" class="form-control" /> </div> <button type="submit" class="btn btn-primary">Add</button> <div id="ownerAddApproverStatus"></div> </form> </div> <div class="col-sm-6"> <h5>Delete Approver</h5> <form id="ownerDeleteApprover"> <div class="form-group"> <label for="deleteApprover">Enter Approver Address to Delete : </label> <input type="text" id="deleteApprover" class="form-control" /> </div> <button type="submit" class="btn btn-danger">Delete</button> <div id="ownerDeleteApproverStatus"></div> </form> </div></div><hr /><div class="row"> <div class="col-sm-12"> <form id="ownerUpdateDeadline"> <h5>Update Deadline & Approver Deadline</h5> <div class="form-group"> <label for="updateDeadline">Enter New Deadline Duration (in seconds) : </label> <input type="text" id="updateDeadline" class="form-control" placeholder="Leave Blank to only update other Deadlines" /> <label for="updateApproverDeadline">Enter New Approver Deadline Duration (inseconds) : </label> <input type="text" id="updateApproverDeadline" class="form-control" placeholder="Leave Blank to only update other Deadlines" /> <label for="updateCharityDeadline">Enter New Charity Deadline Duration (inseconds) : </label> <input type="text" id="updateCharityDeadline" class="form-control" placeholder="Leave Blank to only update other Deadlines" /> </div> <button type="submit" class="btn btn-secondary">Update</button> <div id="ownerUpdateDeadlineStatus"></div> </form> </div></div><hr /><div class="row"> <div class="col-sm-5"> <h5>Transfer ETH</h5> <form id="ownerTransferSomeETH"> <div class="form-group"> <label for="transferSomeETHAmount">Enter ETH to transfer : </label> <input type="number" id="transferSomeETHAmount" class="form-control" step="any" /> <label for="transferSomeETHAddress">Enter the receiver address : </label> <input type="text" id="transferSomeETHAddress" class="form-control" /> </div> <button type="submit" class="btn btn-success">Update</button> <div id="ownerTransferSomeETHStatus"></div> </form> </div> <div class="col-sm-4"> <h5>Withdraw ETH</h5> <form id="ownerWithdrawSomeETH"> <div class="form-group"> <label for="withdrawSomeETH">Enter ETH to withdraw : </label> <input type="number" id="withdrawSomeETH" class="form-control" step="any" /> </div> <button type="submit" class="btn btn-success">Withdraw</button> <div id="ownerWithdrawSomeETHStatus"></div> </form> </div> <div class="col-sm-3"> <h5>Withdraw All ETH</h5> <form id="ownerWithdrawAllETH"> <div class="form-group"> <label for="withdrawAllETH">Click to withdraw All ETH. </label> </div> <button type="submit" class="btn btn-success">Withdraw</button> <div id="ownerWithdrawAllETHStatus"></div> </form> </div></div><hr /><div class="row"> <div class="col-sm-6"> <form id="ownerInteract"> <h5>Interact with other contract (Fallback function)</h5> <div class="form-group"> <label for="addMsgValue">Enter Value to Sent (in ETH) : </label> <input type="number" id="addMsgValue" class="form-control" step="any" /> <label for="addMsgData">Enter Message Data : </label> <input type="text" id="addMsgData" class="form-control" /> </div> <button type="submit" class="btn btn-secondary">Interact</button> <div id="ownerInteractStatus"></div> </form> </div> <div class="col-sm-6"> <form id="ownerDeployContract"> <h5>Deploy Contract</h5> <div class="form-group"> <label for="addContractValue">Enter Value to Sent (in ETH) : </label> <input type="number" id="addContractValue" class="form-control" step="any" /> <label for="addContractBytecode">Enter Contract Bytecode : </label> <input type="text" id="addContractBytecode" class="form-control" /> </div> <button type="submit" class="btn btn-primary">Create</button> <div id="ownerDeployContractStatus"></div> </form> </div></div><hr /><hr /><hr />';
         initApp();
       }
     })
@@ -60,6 +60,9 @@ const checkRights = () => {
 };
 
 const initWalletAddress = () => {
+  let ownerHTML = document.getElementById("ownerHTML");
+  ownerHTML.innerHTML =
+    '<div class="row"><div class="col-sm-12"><h1>Interact with your Wallet Contract</h1><div class="row"><div class="col-sm-12"><form id="setAddress"><div class="form-group"><label for="walletAddress">Wallet Contract Address :</label><input id="walletAddress" type="text" class="form-control"></div><button type="submit" class="btn btn-info">Interact</button><div id="interactStatus"></div></form></div></div></div></div>';
   const setAddress = document.getElementById("setAddress");
   const walletAddress = document.getElementById("walletAddress");
   walletAddress.value = localStorage.getItem("inherichainWalletAddress");
@@ -92,6 +95,12 @@ const clearStatus = () => {
   const ownerUpdateCharityStatus = document.getElementById(
     "ownerUpdateCharityStatus"
   );
+  const ownerUpdateArbitratorStatus = document.getElementById(
+    "ownerUpdateArbitratorStatus"
+  );
+  const ownerUpdateArbitrationFeeDepositTimeStatus = document.getElementById(
+    "ownerUpdateArbitrationFeeDepositTimeStatus"
+  );
   const ownerAddApproverStatus = document.getElementById(
     "ownerAddApproverStatus"
   );
@@ -118,6 +127,8 @@ const clearStatus = () => {
   ownerUpdateBackupOwnerStatus.innerHTML = "";
   ownerUpdateHeirStatus.innerHTML = "";
   ownerUpdateCharityStatus.innerHTML = "";
+  ownerUpdateArbitratorStatus.innerHTML = "";
+  ownerUpdateArbitrationFeeDepositTimeStatus.innerHTML = "";
   ownerAddApproverStatus.innerHTML = "";
   ownerDeleteApproverStatus.innerHTML = "";
   ownerUpdateDeadlineStatus.innerHTML = "";
@@ -134,6 +145,12 @@ const initApp = () => {
   );
   const ownerUpdateHeir = document.getElementById("ownerUpdateHeir");
   const ownerUpdateCharity = document.getElementById("ownerUpdateCharity");
+  const ownerUpdateArbitrator = document.getElementById(
+    "ownerUpdateArbitrator"
+  );
+  const ownerUpdateArbitrationFeeDepositTime = document.getElementById(
+    "ownerUpdateArbitrationFeeDepositTime"
+  );
   const ownerAddApprover = document.getElementById("ownerAddApprover");
   const ownerDeleteApprover = document.getElementById("ownerDeleteApprover");
   const ownerUpdateDeadline = document.getElementById("ownerUpdateDeadline");
@@ -151,6 +168,12 @@ const initApp = () => {
   );
   const ownerUpdateCharityStatus = document.getElementById(
     "ownerUpdateCharityStatus"
+  );
+  const ownerUpdateArbitratorStatus = document.getElementById(
+    "ownerUpdateArbitratorStatus"
+  );
+  const ownerUpdateArbitrationFeeDepositTimeStatus = document.getElementById(
+    "ownerUpdateArbitrationFeeDepositTimeStatus"
   );
   const ownerAddApproverStatus = document.getElementById(
     "ownerAddApproverStatus"
@@ -222,6 +245,42 @@ const initApp = () => {
       })
       .catch((error) => {
         ownerUpdateCharityStatus.innerHTML = "There was an error!";
+        console.log(error);
+      });
+  });
+
+  ownerUpdateArbitrator.addEventListener("submit", async (e) => {
+    clearStatus();
+    ownerUpdateArbitratorStatus.innerHTML = "Transaction Pending...";
+    e.preventDefault();
+    const address = e.target.elements[0].value;
+    inherichain.methods
+      .updateArbitrator(address)
+      .send({ from: accounts[0] })
+      .then(() => {
+        ownerUpdateArbitratorStatus.innerHTML = "Success!";
+      })
+      .catch((error) => {
+        ownerUpdateArbitratorStatus.innerHTML = "There was an error!";
+        console.log(error);
+      });
+  });
+
+  ownerUpdateArbitrationFeeDepositTime.addEventListener("submit", async (e) => {
+    clearStatus();
+    ownerUpdateArbitrationFeeDepositTimeStatus.innerHTML =
+      "Transaction Pending...";
+    e.preventDefault();
+    const deadline = e.target.elements[0].value;
+    inherichain.methods
+      .updateArbitrationFeeDepositTime(deadline)
+      .send({ from: accounts[0] })
+      .then(() => {
+        ownerUpdateArbitrationFeeDepositTimeStatus.innerHTML = "Success!";
+      })
+      .catch((error) => {
+        ownerUpdateArbitrationFeeDepositTimeStatus.innerHTML =
+          "There was an error!";
         console.log(error);
       });
   });

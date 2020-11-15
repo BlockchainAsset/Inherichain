@@ -1,7 +1,9 @@
 const Inherichain = artifacts.require("Inherichain");
 const Demo = artifacts.require("Demo");
 const SimpleERC20 = artifacts.require("SimpleERC20");
-const SimpleCentralizedArbitrator = artifacts.require("SimpleCentralizedArbitrator");
+const SimpleCentralizedArbitrator = artifacts.require(
+  "SimpleCentralizedArbitrator"
+);
 
 const {
   time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -40,7 +42,7 @@ contract("Inherichain (Approver Functions)", (accounts) => {
   const sInitial = 0;
   const sHeirClaimed = 1;
   const sClaimDisputed = 2;
-  const sDisputeResultPending =3;
+  const sDisputeResultPending = 3;
   const sApproverApproved = 4;
   const sArbitratorApproved = 5;
   const sArbitratorRejected = 6;
