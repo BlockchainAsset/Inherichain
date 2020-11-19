@@ -89,3 +89,7 @@ A basic description of all the functions, modifiers, and events are specified in
 ## Documentation
 
 Using solidity-docgen: [Inherichain.md](docs/Inherichain.md)
+
+## Discord
+
+@remedcu#4836
