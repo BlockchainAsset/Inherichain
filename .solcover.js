@@ -1,5 +1,5 @@
 module.exports = {
-    providerOptions: {
-        total_accounts: 15
-    }
-  }
+  providerOptions: {
+    total_accounts: 15,
+  },
+};

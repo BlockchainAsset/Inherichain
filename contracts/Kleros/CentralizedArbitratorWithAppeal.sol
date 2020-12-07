@@ -27,11 +27,21 @@ contract CentralizedArbitratorWithAppeal is IArbitrator {
 
     Dispute[] public disputes;
 
-    function arbitrationCost(bytes memory _extraData) public override view returns (uint256) {
+    function arbitrationCost(bytes memory _extraData)
+        public
+        view
+        override
+        returns (uint256)
+    {
         return arbitrationFee;
     }
 
-    function appealCost(uint256 _disputeID, bytes memory _extraData) public override view returns (uint256) {
+    function appealCost(uint256 _disputeID, bytes memory _extraData)
+        public
+        view
+        override
+        returns (uint256)
+    {
         return arbitrationFee * (2**(disputes[_disputeID].appealCount));
     }
 
@@ -41,11 +51,14 @@ contract CentralizedArbitratorWithAppeal is IArbitrator {
 
     function createDispute(uint256 _choices, bytes memory _extraData)
         public
-        override
         payable
+        override
         returns (uint256 disputeID)
     {
-        require(msg.value >= arbitrationCost(_extraData), "Not enough ETH to cover arbitration costs.");
+        require(
+            msg.value >= arbitrationCost(_extraData),
+            "Not enough ETH to cover arbitration costs."
+        );
 
         disputes.push(
             Dispute({
@@ -64,24 +77,42 @@ contract CentralizedArbitratorWithAppeal is IArbitrator {
         disputeID = disputes.length - 1;
     }
 
-    function disputeStatus(uint256 _disputeID) public override view returns (DisputeStatus status) {
+    function disputeStatus(uint256 _disputeID)
+        public
+        view
+        override
+        returns (DisputeStatus status)
+    {
         Dispute storage dispute = disputes[_disputeID];
-        if (disputes[_disputeID].status == DisputeStatus.Appealable && block.timestamp >= dispute.appealPeriodEnd)
-            return DisputeStatus.Solved;
+        if (
+            disputes[_disputeID].status == DisputeStatus.Appealable &&
+            block.timestamp >= dispute.appealPeriodEnd
+        ) return DisputeStatus.Solved;
         else return disputes[_disputeID].status;
     }
 
-    function currentRuling(uint256 _disputeID) public override view returns (uint256 ruling) {
+    function currentRuling(uint256 _disputeID)
+        public
+        view
+        override
+        returns (uint256 ruling)
+    {
         ruling = disputes[_disputeID].ruling;
     }
 
     function giveRuling(uint256 _disputeID, uint256 _ruling) public {
-        require(msg.sender == owner, "Only the owner of this contract can execute rule function.");
+        require(
+            msg.sender == owner,
+            "Only the owner of this contract can execute rule function."
+        );
 
         Dispute storage dispute = disputes[_disputeID];
 
         require(_ruling <= dispute.choices, "Ruling out of bounds!");
-        require(dispute.status == DisputeStatus.Waiting, "Dispute is not awaiting arbitration.");
+        require(
+            dispute.status == DisputeStatus.Waiting,
+            "Dispute is not awaiting arbitration."
+        );
 
         dispute.ruling = _ruling;
         dispute.status = DisputeStatus.Appealable;
@@ -93,7 +124,10 @@ contract CentralizedArbitratorWithAppeal is IArbitrator {
 
     function executeRuling(uint256 _disputeID) public {
         Dispute storage dispute = disputes[_disputeID];
-        require(dispute.status == DisputeStatus.Appealable, "The dispute must be appealable.");
+        require(
+            dispute.status == DisputeStatus.Appealable,
+            "The dispute must be appealable."
+        );
         require(
             block.timestamp > dispute.appealPeriodEnd,
             "The dispute must be executed after its appeal period has ended."
@@ -103,13 +137,23 @@ contract CentralizedArbitratorWithAppeal is IArbitrator {
         dispute.arbitrated.rule(_disputeID, dispute.ruling);
     }
 
-    function appeal(uint256 _disputeID, bytes memory _extraData) public override payable {
+    function appeal(uint256 _disputeID, bytes memory _extraData)
+        public
+        payable
+        override
+    {
         Dispute storage dispute = disputes[_disputeID];
         dispute.appealCount++;
 
-        require(msg.value >= appealCost(_disputeID, _extraData), "Not enough ETH to cover appeal costs.");
+        require(
+            msg.value >= appealCost(_disputeID, _extraData),
+            "Not enough ETH to cover appeal costs."
+        );
 
-        require(dispute.status == DisputeStatus.Appealable, "The dispute must be appealable.");
+        require(
+            dispute.status == DisputeStatus.Appealable,
+            "The dispute must be appealable."
+        );
         require(
             block.timestamp < dispute.appealPeriodEnd,
             "The appeal must occur before the end of the appeal period."
@@ -120,7 +164,12 @@ contract CentralizedArbitratorWithAppeal is IArbitrator {
         emit AppealDecision(_disputeID, dispute.arbitrated);
     }
 
-    function appealPeriod(uint256 _disputeID) public override view returns (uint256 start, uint256 end) {
+    function appealPeriod(uint256 _disputeID)
+        public
+        view
+        override
+        returns (uint256 start, uint256 end)
+    {
         Dispute storage dispute = disputes[_disputeID];
 
         return (dispute.appealPeriodStart, dispute.appealPeriodEnd);
