@@ -4,6 +4,8 @@
 
 A wallet that has inheritance built-in on the Ethereum Blockchain.
 
+[**Explainer Video**](https://youtu.be/-pQ-zvpdEos)
+
 ## Description
 
 Ethereum wallets are created using a Seed or Private Key and can send and receive almost any ethereum assets and create contracts. But it lacks a significant feature, which is to retrieve the assets in case of the wallet owner's demise.
