@@ -1,0 +1,16 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: solc
+    versions:
+    - 0.8.1
+    - 0.8.3
+  - dependency-name: webpack-cli
+    versions:
+    - 4.4.0
+    - 4.5.0
