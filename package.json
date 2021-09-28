@@ -36,7 +36,7 @@
     "@kleros/erc-792": "^7.0.0",
     "@openzeppelin/test-helpers": "^0.5.7",
     "ganache-cli": "^6.12.0",
-    "solc": "0.8.6",
+    "solc": "0.8.8",
     "solhint": "^3.2.1",
     "solidity-docgen": "^0.5.7",
     "truffle": "^5.1.48",
