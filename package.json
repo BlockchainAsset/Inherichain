@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/remedcu/Inherichain#readme",
   "dependencies": {
-    "@kleros/erc-792": "^7.0.0",
+    "@kleros/erc-792": "^8.0.0",
     "@openzeppelin/test-helpers": "^0.5.7",
     "ganache-cli": "^6.12.0",
     "solc": "0.8.9",
