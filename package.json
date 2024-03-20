@@ -43,7 +43,7 @@
     "web3": "^4.0.1",
     "webpack": "^5.35.1",
     "webpack-cli": "^5.0.0",
-    "webpack-dev-server": "^4.0.0"
+    "webpack-dev-server": "^5.0.4"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
